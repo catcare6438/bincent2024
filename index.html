@@ -598,8 +598,12 @@ tr:hover td{background:rgba(255,183,197,.03);}
 </div>
 
 <!-- 貓咪詳情 Modal -->
-<div class="modal" id="catModal">
-  <div class="modal-box" id="modal-content"></div>
+<div id="catModal" class="modal-bg" style="display: none;">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <div id="modalDetail">
+            </div>
+    </div>
 </div>
 
 <!-- ══ MAIN APP ══ -->
@@ -2731,7 +2735,7 @@ async function uploadVideoToGitHub(base64Data, mimeType) {
 }
 
 // 讀取 GitHub 上的貼文
-async function loadPostsFromGH() {
+() {
   if(!ghReady()) return;
   const { user, repo, token } = getGHConfig();
   try {
@@ -2748,7 +2752,7 @@ async function loadPostsFromGH() {
     savePosts(merged);
     renderPosts();
     renderAdminPosts();
-    updateStats(getCats());
+    updateStatsvar cfg={repoUrl:''}; var CAT_INTROS=[];(getCats());
     buildBigCaro(getCats());
   } catch(e) { console.log('loadPostsFromGH:', e); }
 }
