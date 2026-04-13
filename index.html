@@ -687,7 +687,7 @@ tr:hover td{background:rgba(255,183,197,.03);}
 
       <!-- 未登入提示 -->
       <div id="share-login-hint" style="text-align:center;padding:12px;background:rgba(255,183,197,.1);border:1.5px dashed var(--p1);border-radius:12px;margin-bottom:12px;font-size:.78rem;color:var(--mid);">
-        <div style="font-size:1.4rem;margin-bottom:5px">🐱</div>
+        
         想分享貓咪近況？<br>
         請先用管理員提供的帳號 <b style="color:var(--p3)">登入</b> 後才能上傳
       </div>
@@ -2289,9 +2289,14 @@ function renderAdminPosts() {
   </div>`).join('');
 }
 function deletePost(id) {
-  savePosts(getPosts().filter(p => p.id !== id));
-  renderPosts(); renderAdminPosts(); updateStats(getCats()); buildBigCaro(getCats());
-  toast('已刪除', 'ok');
+  if(!confirm('確定刪除？')) return;
+  savePosts(getPosts().filter(p=>p.id!==id));
+  const del=JSON.parse(localStorage.getItem('wc_del')||'[]');
+  del.push(id); localStorage.setItem('wc_del',JSON.stringify(del));
+  const sbId=id.startsWith('sb')?id.slice(2):null;
+  if(sbId) sbXHR('DELETE','/rest/v1/posts?id=eq.'+sbId,null,()=>{});
+  renderPosts();renderAdminPosts();buildBigCaro(getCats());
+  toast('已刪除','ok');
 }
 function fmtTime(ts) { return new Date(ts).toLocaleString('zh-TW', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'}); }
 
@@ -2860,49 +2865,38 @@ function compressImage(file, maxW){
 // ═══════════════════════════════════
 // Supabase 全面雲端同步
 // ═══════════════════════════════════
-async function sbFull() {
-  // ── 貓咪照片 ──
-  try {
-    const res = await sbGet('/rest/v1/cat_photos?select=*&order=created_at.asc');
-    if(res && res.ok && res.data && res.data.length) {
-      const map = {};
-      res.data.forEach(row => {
-        if(!map[row.cat_id]) map[row.cat_id] = [];
-        if(!map[row.cat_id].includes(row.url)) map[row.cat_id].push(row.url);
+async function sbFull(){
+  const del=new Set(JSON.parse(localStorage.getItem('wc_del')||'[]'));
+  try{
+    const res=await sbGet('/rest/v1/cat_photos?select=*&order=created_at.asc');
+    if(res&&res.ok&&res.data&&res.data.length){
+      const map={};
+      res.data.forEach(r=>{if(!map[r.cat_id])map[r.cat_id]=[];if(!map[r.cat_id].includes(r.url))map[r.cat_id].push(r.url);});
+      const cats=getCats();let changed=false;
+      cats.forEach(c=>{
+        const cloud=map[c.id]||[];if(!cloud.length)return;
+        if(!c.photoBase64)c.photoBase64=[];
+        const local=c.photoBase64.filter(u=>!u.startsWith('http'));
+        const merged=[...new Set([...cloud,...local])];
+        if(JSON.stringify(merged)!==JSON.stringify(c.photoBase64)){c.photoBase64=merged;changed=true;}
       });
-      const cats = getCats(); let changed = false;
-      cats.forEach(c => {
-        const cloud = map[c.id] || [];
-        if(!cloud.length) return;
-        if(!c.photoBase64) c.photoBase64 = [];
-        const local = c.photoBase64.filter(u => !u.startsWith('http'));
-        const merged = [...new Set([...cloud, ...local])];
-        if(JSON.stringify(merged) !== JSON.stringify(c.photoBase64)) {
-          c.photoBase64 = merged; changed = true;
-        }
-      });
-      if(changed) { saveCats(cats); renderAll(); buildWaterfall(getCats()); }
+      if(changed){saveCats(cats);renderAll();buildWaterfall(getCats());}
     }
-  } catch(e) { console.log('photo sync:', e.message); }
-
-  // ── 貼文 ──
-  try {
-    const res = await sbGet('/rest/v1/posts?select=*,post_media(*)&order=created_at.desc&limit=200');
-    if(res && res.ok && res.data && res.data.length) {
-      const sbPosts = res.data.map(p => ({
-        id:'sb'+p.id, sbId:p.id, catId:p.cat_id,
-        ownerName:p.owner_name, text:p.text,
-        postType:p.post_type||'adopted',
-        likes:p.likes||0,
+  }catch(e){console.log('photo sync:',e.message);}
+  try{
+    const res=await sbGet('/rest/v1/posts?select=*,post_media(*)&order=created_at.desc&limit=200');
+    if(res&&res.ok&&res.data&&res.data.length){
+      const sb=res.data.filter(p=>!del.has('sb'+p.id)).map(p=>({
+        id:'sb'+p.id,sbId:p.id,catId:p.cat_id,ownerName:p.owner_name,
+        text:p.text,postType:p.post_type||'adopted',likes:p.likes||0,
         createdAt:new Date(p.created_at).getTime(),
-        media:(p.post_media||[]).map(m=>({type:m.type, data:m.url, isUrl:true}))
+        media:(p.post_media||[]).map(m=>({type:m.type,data:m.url,isUrl:true}))
       }));
-      const local = getPosts().filter(p => !p.sbId);
-      const merged = [...sbPosts, ...local].sort((a,b) => b.createdAt - a.createdAt);
-      savePosts(merged);
-      renderPosts(); renderAdminPosts(); buildBigCaro(getCats());
+      const local=getPosts().filter(p=>!p.sbId&&!del.has(p.id));
+      const merged=[...sb,...local].sort((a,b)=>b.createdAt-a.createdAt);
+      savePosts(merged);renderPosts();renderAdminPosts();buildBigCaro(getCats());
     }
-  } catch(e) { console.log('post sync:', e.message); }
+  }catch(e){console.log('post sync:',e.message);}
 }
 // 覆蓋 jbSync
 async function jbSync(){await sbFull();}
@@ -3098,16 +3092,17 @@ function setPostType(t) {
   }
 }
 
-function buildDailyCaro() {
-  const track = document.getElementById('daily-caro-track');
-  if(!track) return;
-  const daily = getPosts().filter(p=>p.postType==='daily'||(!p.catId&&!p.postType));
-  if(!daily.length){track.innerHTML='<div style="color:var(--soft);font-size:.75rem;padding:8px">尚無中心日常貼文</div>';return;}
-  track.innerHTML = daily.slice(0,20).map(p=>{
-    const img = p.media && p.media.find(m=>m.type==='image');
-    return `<div style="flex-shrink:0;width:140px;border-radius:14px;overflow:hidden;background:white;box-shadow:0 2px 10px rgba(224,80,112,.15);cursor:pointer" onclick="openPost('${p.id}')">
-      ${img ? `<img src="${img.data}" style="width:100%;height:100px;object-fit:cover;">` : '<div style="width:100%;height:100px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:1.5rem">🏠</div>'}
-      <div style="padding:7px 8px;font-size:.7rem;color:var(--soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.text||p.ownerName}</div>
+function buildDailyCaro(){
+  const wrap=document.getElementById('daily-caro-track');
+  if(!wrap)return;
+  const daily=getPosts().filter(p=>p.postType==='daily');
+  if(!daily.length){wrap.innerHTML='<div style="color:var(--soft);font-size:.75rem;padding:12px">尚無中心日常</div>';return;}
+  wrap.innerHTML=daily.slice(0,20).map(p=>{
+    const img=(p.media||[]).find(m=>m.type==='image');
+    const txt=(p.text||'').slice(0,25)||p.ownerName||'中心日常';
+    return `<div style="flex-shrink:0;width:150px;border-radius:16px;overflow:hidden;background:white;box-shadow:0 3px 12px rgba(224,80,112,.15);cursor:pointer" onclick="goPage('share')">
+      ${img?`<img src="${img.data}" style="width:100%;height:110px;object-fit:cover;display:block;">`:`<div style="width:100%;height:110px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:2rem">🏠</div>`}
+      <div style="padding:8px 10px;"><div style="font-size:.72rem;color:var(--p3);font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${txt}</div><div style="font-size:.62rem;color:var(--soft);margin-top:2px">${p.ownerName||''}</div></div>
     </div>`;
   }).join('');
 }
