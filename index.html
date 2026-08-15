@@ -232,10 +232,19 @@
 
   .lightbox-bg{position:fixed;inset:0;background:rgba(20,17,14,0.94);z-index:300;display:flex;
     flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px;}
-  .lightbox-img{max-width:92vw;max-height:76vh;object-fit:contain;border-radius:12px;}
+  .lightbox-stage{position:relative;display:flex;align-items:center;justify-content:center;width:100%;}
+  .lightbox-img{max-width:92vw;max-height:76vh;object-fit:contain;border-radius:12px;touch-action:pan-y;}
   .lightbox-close{position:absolute;top:calc(16px + env(safe-area-inset-top));right:16px;width:40px;height:40px;border-radius:50%;
-    background:rgba(255,255,255,0.15);color:#fff;border:none;display:flex;align-items:center;justify-content:center;}
+    background:rgba(255,255,255,0.15);color:#fff;border:none;display:flex;align-items:center;justify-content:center;z-index:2;}
   .lightbox-close svg{width:20px;height:20px;}
+  .lightbox-nav{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;
+    background:rgba(255,255,255,0.15);color:#fff;border:none;display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:2;}
+  .lightbox-nav svg{width:18px;height:18px;}
+  .lightbox-prev{left:6px;}
+  .lightbox-next{right:6px;}
+  .lightbox-dots{display:flex;gap:6px;}
+  .lightbox-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.4);}
+  .lightbox-dot.active{background:#fff;width:16px;border-radius:4px;transition:width .15s;}
 
   .modal-bg{position:fixed;inset:0;background:rgba(64,59,54,0.45);z-index:200;display:flex;
     align-items:flex-end;justify-content:center;}
@@ -442,13 +451,25 @@ async function openPublicCatDetail(id){
   try{
     const cat = await apiFetch('/api/public/cats/'+id, {auth:false});
     state.publicCatDetail = cat; state.publicCatId = id; state.view='public-detail'; render(); window.scrollTo(0,0);
+    try{ history.pushState({cat:id}, '', '?cat='+id); }catch(e){}
   }catch(e){ toast('找不到這筆貓咪資料','err'); }
 }
 function replaceCatInState(updatedCat){
   const idx = state.cats.findIndex(c=>c.id===updatedCat.id);
   if(idx>=0) state.cats[idx]=updatedCat; else state.cats.unshift(updatedCat);
 }
-function go(view, extra){ Object.assign(state, {view}, extra||{}); render(); window.scrollTo(0,0); }
+function go(view, extra){
+  Object.assign(state, {view}, extra||{}); render(); window.scrollTo(0,0);
+  if(view!=='public-detail' && location.search.indexOf('cat=')>=0){
+    try{ history.pushState({}, '', location.pathname); }catch(e){}
+  }
+}
+window.addEventListener('popstate', function(){
+  const catId = new URLSearchParams(location.search).get('cat');
+  if(catId){ openPublicCatDetail(catId); }
+  else if(state && state.user){ go('dashboard'); }
+  else { go('public-home'); }
+});
 function toast(msg, type){
   const wrap = document.getElementById('toastWrap');
   const el = document.createElement('div');
@@ -625,11 +646,11 @@ function renderPublicDetail(){
   const photo = photos[0] || null;
   return `
     <div class="detail-hero">
-      ${photo?`<img src="${photo}" data-lb="${photo}" style="cursor:pointer">`:`<div class="cat-photo-ph" style="aspect-ratio:4/3">尚無照片</div>`}
+      ${photo?`<img src="${photo}" data-lbindex="0" style="cursor:pointer">`:`<div class="cat-photo-ph" style="aspect-ratio:4/3">尚無照片</div>`}
       <button class="back-btn" id="pdBack">${ICONS.back}</button>
       <div class="detail-hero-overlay"><div class="name">${esc(c.name)}</div>${statusPill(c.status)}</div>
     </div>
-    ${photos.length>1?`<div class="card" style="margin-bottom:16px"><div class="thumb-row">${photos.map(p=>`<img src="${p}" data-lb="${p}" style="cursor:pointer">`).join('')}</div></div>`:''}
+    ${photos.length>1?`<div class="card" style="margin-bottom:16px"><div class="thumb-row">${photos.map((p,i)=>`<img src="${p}" data-lbindex="${i}" style="cursor:pointer">`).join('')}</div></div>`:''}
     <div class="section">
       <div class="section-head"><h3>基本資料</h3></div>
       <div class="card kv-grid">
@@ -660,7 +681,10 @@ function renderPublicDetail(){
 function bindPublicDetail(){
   const c = state.publicCatDetail;
   document.getElementById('pdBack').addEventListener('click', ()=>go('public-home'));
-  document.querySelectorAll('[data-lb]').forEach(img=>img.addEventListener('click', ()=>openLightbox(img.dataset.lb)));
+  document.querySelectorAll('[data-lbindex]').forEach(img=>img.addEventListener('click', ()=>{
+    const photos = (c && c.photos) || [];
+    openLightbox(photos, +img.dataset.lbindex);
+  }));
   const copyBtn = document.getElementById('copyLinkBtn');
   if(copyBtn) copyBtn.addEventListener('click', async ()=>{
     const url = window.location.href;
@@ -1090,9 +1114,10 @@ function renderCatDetail(id){
   const c = findCat(id);
   if(!c) return `<div class="empty">找不到這筆貓咪資料</div>`;
   const photo = mainPhoto(c);
+  const heroIdx = c.photos.findIndex(function(p){ return p.isMain; });
   return `
     <div class="detail-hero">
-      ${photo?`<img src="${photo}" data-lb="${photo}" style="cursor:pointer">`:`<div class="cat-photo-ph" style="aspect-ratio:4/3">尚無照片</div>`}
+      ${photo?`<img src="${photo}" data-lbindex="${heroIdx>=0?heroIdx:0}" style="cursor:pointer">`:`<div class="cat-photo-ph" style="aspect-ratio:4/3">尚無照片</div>`}
       <button class="back-btn" id="backBtn">${ICONS.back}</button>
       <div class="detail-hero-overlay"><div class="name">${esc(c.name)}</div>${statusPill(c.status)}</div>
     </div>
@@ -1154,7 +1179,7 @@ function renderCatDetail(id){
 
     <div class="section"><div class="section-head"><h3>照片</h3><button class="btn btn-ghost btn-sm" id="addPhotoBtn">＋ 新增照片</button></div>
       <div class="card">
-        ${c.photos.length?`<div class="thumb-row">${c.photos.map((p)=>`<img src="${p.data}" data-photo="${p.data}" data-photoid="${p.id}" data-ismain="${p.isMain?'1':''}" style="cursor:pointer;${p.isMain?'outline:2px solid var(--accent)':''}">`).join('')}</div>`:`<div class="empty" style="padding:24px 10px">尚無照片</div>`}
+        ${c.photos.length?`<div class="thumb-row">${c.photos.map((p,i)=>`<img src="${p.data}" data-lbindex="${i}" style="cursor:pointer;${p.isMain?'outline:2px solid var(--accent)':''}">`).join('')}</div>`:`<div class="empty" style="padding:24px 10px">尚無照片</div>`}
       </div>
     </div>
   `;
@@ -1162,19 +1187,19 @@ function renderCatDetail(id){
 function bindCatDetail(id){
   const c = findCat(id);
   document.getElementById('backBtn').addEventListener('click', ()=>go('cats'));
-  const heroImg = document.querySelector('.detail-hero [data-lb]');
-  if(heroImg) heroImg.addEventListener('click', ()=>openLightbox(heroImg.dataset.lb));
   document.getElementById('addHealthBtn').addEventListener('click', ()=>openHealthModal(c));
   document.getElementById('addLogBtn').addEventListener('click', ()=>openFosterLogModal(c));
   document.getElementById('changeStatusBtn').addEventListener('click', ()=>openStatusModal(c));
   document.getElementById('addPhotoBtn').addEventListener('click', ()=>openPhotoModal(c));
-  document.querySelectorAll('[data-photo]').forEach(img=>img.addEventListener('click', ()=>{
-    const isMain = img.dataset.ismain === '1';
-    openLightbox(img.dataset.photo, {
-      setMainLabel: isMain ? null : '設為主要照片',
-      onSetMain: isMain ? null : async ()=>{
+  document.querySelectorAll('[data-lbindex]').forEach(img=>img.addEventListener('click', ()=>{
+    const photoUrls = c.photos.map(function(p){ return p.data; });
+    openLightbox(photoUrls, +img.dataset.lbindex, {
+      isMainAt: function(i){ return c.photos[i] && c.photos[i].isMain; },
+      setMainLabel: '設為主要照片',
+      onSetMain: async function(i){
+        const photoId = c.photos[i].id;
         try{
-          const cat = await apiFetch(`/api/cats/${c.id}/actions`, { method:'POST', body:{ action:'set-main-photo', payload:{ photoId: img.dataset.photoid } } });
+          const cat = await apiFetch(`/api/cats/${c.id}/actions`, { method:'POST', body:{ action:'set-main-photo', payload:{ photoId } } });
           replaceCatInState(cat); render(); toast('已設定主要照片');
         }catch(e){ toast(e.message,'err'); }
       }
@@ -1198,20 +1223,49 @@ function openModal(html, onMount){
   bg.addEventListener('click', (e)=>{ if(e.target===bg) bg.remove(); });
   document.body.appendChild(bg); onMount && onMount(bg); return bg;
 }
-function openLightbox(src, opts){
+function openLightbox(photos, startIndex, opts){
   opts = opts || {};
+  photos = Array.isArray(photos) ? photos : [photos];
+  let idx = startIndex || 0;
   const bg = document.createElement('div'); bg.className='lightbox-bg';
-  bg.innerHTML = `
-    <button class="lightbox-close" id="lbClose">${ICONS.x}</button>
-    <img src="${src}" class="lightbox-img">
-    ${opts.setMainLabel?`<button class="btn btn-primary" id="lbSetMain">${opts.setMainLabel}</button>`:''}
-  `;
-  bg.addEventListener('click', (e)=>{ if(e.target===bg) bg.remove(); });
   document.body.appendChild(bg);
-  bg.querySelector('#lbClose').addEventListener('click', ()=>bg.remove());
-  if(opts.onSetMain){
-    bg.querySelector('#lbSetMain').addEventListener('click', async ()=>{ await opts.onSetMain(); bg.remove(); });
+
+  function draw(){
+    const isMain = opts.isMainAt ? opts.isMainAt(idx) : false;
+    const showMainBtn = opts.setMainLabel && !isMain;
+    bg.innerHTML = `
+      <button class="lightbox-close" id="lbClose">${ICONS.x}</button>
+      <div class="lightbox-stage">
+        ${photos.length>1?`<button class="lightbox-nav lightbox-prev" id="lbPrev">${ICONS.back}</button>`:''}
+        <img src="${photos[idx]}" class="lightbox-img" id="lbImg">
+        ${photos.length>1?`<button class="lightbox-nav lightbox-next" id="lbNext">${ICONS.chevron}</button>`:''}
+      </div>
+      ${photos.length>1?`<div class="lightbox-dots">${photos.map((_,i)=>`<span class="lightbox-dot ${i===idx?'active':''}"></span>`).join('')}</div>`:''}
+      ${showMainBtn?`<button class="btn btn-primary" id="lbSetMain">${opts.setMainLabel}</button>`:''}
+    `;
+    bg.querySelector('#lbClose').addEventListener('click', ()=>bg.remove());
+    if(photos.length>1){
+      bg.querySelector('#lbPrev').addEventListener('click', (e)=>{ e.stopPropagation(); idx=(idx-1+photos.length)%photos.length; draw(); });
+      bg.querySelector('#lbNext').addEventListener('click', (e)=>{ e.stopPropagation(); idx=(idx+1)%photos.length; draw(); });
+    }
+    if(showMainBtn){
+      bg.querySelector('#lbSetMain').addEventListener('click', async ()=>{ await opts.onSetMain(idx); bg.remove(); });
+    }
+    let touchStartX = null;
+    const stage = bg.querySelector('.lightbox-stage');
+    stage.addEventListener('touchstart', function(e){ touchStartX = e.touches[0].clientX; }, {passive:true});
+    stage.addEventListener('touchend', function(e){
+      if(touchStartX===null || photos.length<2) return;
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      if(Math.abs(dx) > 40){
+        idx = dx < 0 ? (idx+1)%photos.length : (idx-1+photos.length)%photos.length;
+        draw();
+      }
+      touchStartX = null;
+    }, {passive:true});
   }
+  draw();
+  bg.addEventListener('click', (e)=>{ if(e.target===bg) bg.remove(); });
 }
 function diseaseChipsHTML(local){
   const all = DISEASE_LIST.concat(local.extraCustom);
@@ -1560,6 +1614,13 @@ function bindActivity(){
     }
   } else {
     await loadPublicData();
+    const catIdFromUrl = new URLSearchParams(location.search).get('cat');
+    if(catIdFromUrl){
+      try{
+        const cat = await apiFetch('/api/public/cats/'+catIdFromUrl, {auth:false});
+        state.publicCatDetail = cat; state.publicCatId = catIdFromUrl; state.view = 'public-detail';
+      }catch(e){ state.view = 'public-home'; }
+    }
   }
   render();
   const splash = document.getElementById('splash');
