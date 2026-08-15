@@ -1,3 +1,10 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>浪貓不浪｜中途管理系統</title>
+<meta name="description" content="動物中途之家管理系統：貓咪資料、健康紀錄、用藥追蹤、認養管理與 LINE 發布">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -8,7 +15,7 @@
     --radius:14px; --shadow:0 1px 2px rgba(64,59,54,0.04), 0 4px 14px rgba(64,59,54,0.05);
   }
   *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--text);overflow-x:hidden;
     font-family:'Noto Sans TC',-apple-system,BlinkMacSystemFont,sans-serif;-webkit-font-smoothing:antialiased;}
   #root{max-width:1200px;margin:0 auto;min-height:100vh;position:relative;display:flex;}
   button{font-family:inherit;cursor:pointer;}
@@ -56,7 +63,7 @@
   .btn-primary:hover{background:var(--accent-deep);}
   .btn-secondary{background:var(--secondary);color:var(--text);}
   .btn-ghost{background:transparent;color:var(--text-soft);border:1px solid var(--line);}
-  .btn-sm{padding:7px 13px;font-size:12.5px;}
+  .btn-sm{padding:9px 14px;min-height:36px;font-size:12.5px;}
   .btn-full{width:100%;}
   .btn:disabled{opacity:.5;cursor:not-allowed;}
   .pill{display:inline-flex;align-items:center;padding:4px 11px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;}
@@ -65,17 +72,17 @@
   .field .hint{font-size:12px;color:var(--text-soft);font-weight:400;margin-left:6px;}
   .field input[type=text],.field input[type=password],.field input[type=date],.field textarea,.field select{
     width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;
-    font-size:15px;color:var(--text);appearance:none;-webkit-appearance:none;}
+    font-size:16px;color:var(--text);appearance:none;-webkit-appearance:none;}
   .field select{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="%238A8177" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>');
     background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
   .field textarea{resize:vertical;min-height:80px;line-height:1.6;}
   .field input:focus,.field textarea:focus,.field select:focus{outline:2px solid var(--accent);outline-offset:1px;}
   .seg{display:flex;gap:8px;flex-wrap:wrap;}
-  .seg button{padding:9px 15px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:13px;
+  .seg button{padding:11px 16px;min-height:42px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:13.5px;
     color:var(--text-soft);font-weight:500;}
   .seg button.active{background:var(--text);color:#fff;border-color:var(--text);}
   .chip-grid{display:flex;flex-wrap:wrap;gap:8px;}
-  .chip{padding:8px 13px;border-radius:20px;border:1px solid var(--line);background:#fff;font-size:12.5px;
+  .chip{padding:10px 15px;min-height:40px;border-radius:20px;border:1px solid var(--line);background:#fff;font-size:13px;
     color:var(--text-soft);font-weight:500;}
   .chip.active{background:var(--accent);color:#fff;border-color:var(--accent);}
   .chip-count{font-size:12px;color:var(--text-soft);margin-top:6px;}
@@ -106,11 +113,11 @@
   .quick-btn:hover{background:var(--secondary);}
 
   .search-row{display:flex;gap:8px;margin-bottom:12px;}
-  .search-row input{flex:1;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:14px;}
+  .search-row input{flex:1;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:16px;}
   .filter-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:18px;}
   .filter-row::-webkit-scrollbar{display:none;}
-  .filter-chip{flex-shrink:0;padding:8px 15px;border-radius:20px;border:1px solid var(--line);background:#fff;
-    font-size:13px;color:var(--text-soft);font-weight:500;}
+  .filter-chip{flex-shrink:0;padding:9px 16px;min-height:40px;border-radius:20px;border:1px solid var(--line);background:#fff;
+    font-size:13px;color:var(--text-soft);font-weight:500;display:flex;align-items:center;}
   .filter-chip.active{background:var(--text);color:#fff;border-color:var(--text);}
   .cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   @media (min-width:640px){.cat-grid{grid-template-columns:repeat(3,1fr);}}
@@ -141,7 +148,7 @@
   .photo-slot img{width:100%;height:100%;object-fit:cover;display:block;}
   .photo-slot .main-badge{position:absolute;top:6px;left:6px;background:var(--accent);color:#fff;font-size:10px;
     font-weight:700;padding:2px 7px;border-radius:8px;}
-  .photo-slot .del-btn{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;
+  .photo-slot .del-btn{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;
     background:rgba(64,59,54,0.65);color:#fff;border:none;display:flex;align-items:center;justify-content:center;}
   .photo-slot .set-main{position:absolute;bottom:0;left:0;right:0;background:rgba(64,59,54,0.55);color:#fff;
     font-size:10px;text-align:center;padding:4px 0;border:none;width:100%;}
@@ -237,6 +244,9 @@
   .badge-role{font-size:11px;padding:2px 8px;border-radius:10px;background:var(--secondary);color:var(--text-soft);font-weight:600;}
   .badge-off{background:var(--gray-bg);color:var(--gray);}
 </style>
+</head>
+<body>
+
 
 <div id="root">
   <aside id="sidebar"></aside>
@@ -249,7 +259,7 @@
 <div class="toast-wrap" id="toastWrap"></div>
 
 <script>
-const ADMIN_PASSWORD = '333';
+// 注意：管理員密碼只存在伺服器端的環境變數，這裡不再保留任何密碼常數。
 
 const ICONS = {
   home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1Z"/></svg>',
@@ -323,71 +333,71 @@ function fmtDateOnly(d){ const dt=new Date(d); return `${dt.getFullYear()}/${Str
 function todayStr(){ return fmtDateOnly(new Date()); }
 function todayInput(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 
+// ---------------- API / session ----------------
+const TOKEN_KEY = 'foster_token';
+const USER_KEY = 'foster_user';
+function authHeaders(){ const t=localStorage.getItem(TOKEN_KEY); return t?{Authorization:'Bearer '+t}:{}; }
+function clearSession(){ localStorage.removeItem(TOKEN_KEY); localStorage.removeItem(USER_KEY); }
+async function apiFetch(path, opts){
+  opts = opts || {};
+  const method = opts.method || 'GET';
+  const auth = opts.auth !== false;
+  const headers = Object.assign({'Content-Type':'application/json'}, auth?authHeaders():{});
+  let res;
+  try{
+    res = await fetch(path, { method, headers, body: opts.body!==undefined ? JSON.stringify(opts.body) : undefined });
+  }catch(e){
+    throw new Error('連線失敗，請確認網路連線後再試一次');
+  }
+  let data = null;
+  try{ data = await res.json(); }catch(e){}
+  if(!res.ok){
+    if(res.status===401 && auth){ clearSession(); state.user=null; }
+    throw new Error((data && data.error) || '發生錯誤，請稍後再試');
+  }
+  return data;
+}
+
 // ---------------- state ----------------
 let state = null;
-let saveTimer = null;
 
-function seedState(){
-  const now = Date.now();
-  const mk=(o)=>Object.assign({
-    id:uid(), photos:[], health:{external:'',vaccine:'',neuter:'',chip:'',status:'',note:'',records:[]},
-    fosterLogs:[], adoption:{history:[]}, linePosts:[], medications:[], aiContent:null, personalityTags:[], createdAt:now, updatedAt:now
-  }, o);
+function freshState(){
   return {
-    view:'public-home', publicCatId:null, user:null, loginTab:'volunteer', catQuery:'', catFilter:'全部',
-    volunteers:[
-      {id:uid(), name:'小雅', password:'1234', active:true},
-      {id:uid(), name:'阿柏', password:'5678', active:true},
-    ],
-    activityLog:[],
-    addCat:null,
-    cats:[
-      mk({name:'月亮', gender:'女生', age:'6個月～1歲', color:'三花', personalityTags:['慢熟','親人','溫和'],
-        fosterDate:'2026-07-02', rescueSource:'路邊拾獲', status:'找家中', updatedAt: now-1000*60*40,
-        health:{external:'已完成',vaccine:'已完成第一劑',neuter:'未完成',chip:'未完成',status:'健康良好',note:'',
-          records:[{id:uid(),date:'2026/08/14',type:'疫苗',volunteer:'小雅',note:'完成第一劑疫苗，精神食慾正常。'}]},
-        fosterLogs:[{id:uid(),date:'2026/08/10',content:'今天開始願意主動靠近人，會蹭手。',by:'小雅'}],
-        adoption:{status:'找家中', history:[{date:'2026/07/05',status:'找家中',by:'小雅',note:'剛結束檢疫，開放認養。'}]},
-        photos:[]}),
-      mk({name:'酸酸', gender:'男生', age:'1～2歲', color:'橘白', personalityTags:['活潑','好動','喜歡逗貓棒'],
-        fosterDate:'2026-05-18', rescueSource:'志工轉介', status:'治療中', updatedAt: now-1000*60*60*2,
-        health:{external:'已完成',vaccine:'未施打',neuter:'已完成',chip:'已完成',status:'治療中',note:'黴菌感染治療中',
-          records:[{id:uid(),date:'2026/08/12',type:'看診',volunteer:'阿柏',note:'皮膚黴菌治療，回診追蹤。',diseases:[{name:'黴菌感染（皮癬菌）',needsMed:true,totalPacks:'20',frequency:'早晚一次'}]}]},
-        medications:[{id:uid(), disease:'黴菌感染（皮癬菌）', totalPacks:20, frequency:'早晚一次', perDay:2, remainingPacks:4, by:'阿柏', startedAt: now-1000*60*60*24*8}],
-        fosterLogs:[], adoption:{status:'治療中', history:[{date:'2026/06/01',status:'治療中',by:'阿柏',note:'發現皮膚問題，暫停開放認養。'}]},
-        photos:[]}),
-      mk({name:'大寶', gender:'男生', age:'2～5歲', color:'黑白（乳牛）', personalityTags:['穩重','親人','喜歡曬太陽'],
-        fosterDate:'2026-03-22', rescueSource:'中途轉介', status:'已找到家', updatedAt: now-1000*60*60*22,
-        health:{external:'已完成',vaccine:'已完成',neuter:'已完成',chip:'已完成',status:'健康良好',note:'',records:[]},
-        fosterLogs:[], adoption:{status:'已找到家', history:[
-          {date:'2026/07/20',status:'已預約',by:'小雅',note:'認養人到府訪視通過。'},
-          {date:'2026/07/28',status:'已找到家',by:'小雅',note:'完成簽約，順利送養。'}]},
-        photos:[]}),
-    ]
+    view:'public-home', user:null, loginTab:'volunteer', catQuery:'', catFilter:'全部',
+    cats:[], volunteers:[], publicVolunteers:[], activityLog:[],
+    addCat:null, publicCatId:null, publicCatDetail:null,
   };
 }
-
-async function loadState(){
+async function loadPublicData(){
+  try{ state.cats = await apiFetch('/api/public/cats', {auth:false}); }catch(e){ state.cats=[]; toast(e.message,'err'); }
+  try{ state.publicVolunteers = await apiFetch('/api/public/volunteers', {auth:false}); }catch(e){ state.publicVolunteers=[]; }
+}
+async function loadInternalData(){
+  state.cats = await apiFetch('/api/cats');
+  state.volunteers = await apiFetch('/api/volunteers');
+  if(state.user.role==='管理員'){
+    try{ state.activityLog = await apiFetch('/api/activity'); }catch(e){ state.activityLog=[]; }
+  }
+}
+async function openActivityPage(){
+  try{ state.activityLog = await apiFetch('/api/activity'); state.view='activity'; render(); }
+  catch(e){ toast(e.message,'err'); }
+}
+async function openVolunteersPage(){
+  try{ state.volunteers = await apiFetch('/api/volunteers'); state.view='volunteers'; render(); }
+  catch(e){ toast(e.message,'err'); }
+}
+async function openPublicCatDetail(id){
   try{
-    const res = await window.storage.get('app-state', false);
-    if(res && res.value){ state = JSON.parse(res.value);
-      if(!state.activityLog) state.activityLog = [];
-      if(!state.volunteers) state.volunteers = [];
-      if(!state.view) state.view = 'public-home';
-      return; }
-  }catch(e){}
-  state = seedState();
+    const cat = await apiFetch('/api/public/cats/'+id, {auth:false});
+    state.publicCatDetail = cat; state.publicCatId = id; state.view='public-detail'; render(); window.scrollTo(0,0);
+  }catch(e){ toast('找不到這筆貓咪資料','err'); }
 }
-function persist(){
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(async ()=>{
-    try{ const ok = await window.storage.set('app-state', JSON.stringify(state), false);
-      if(!ok) toast('資料暫存失敗，重新整理後可能遺失變更','err');
-    }catch(e){ toast('資料暫存失敗，重新整理後可能遺失變更','err'); }
-  }, 250);
+function replaceCatInState(updatedCat){
+  const idx = state.cats.findIndex(c=>c.id===updatedCat.id);
+  if(idx>=0) state.cats[idx]=updatedCat; else state.cats.unshift(updatedCat);
 }
-function setState(patch){ Object.assign(state, patch); persist(); render(); }
-function go(view, extra){ setState(Object.assign({view}, extra||{})); window.scrollTo(0,0); }
+function go(view, extra){ Object.assign(state, {view}, extra||{}); render(); window.scrollTo(0,0); }
 function toast(msg, type){
   const wrap = document.getElementById('toastWrap');
   const el = document.createElement('div');
@@ -395,13 +405,6 @@ function toast(msg, type){
   el.textContent = msg;
   wrap.appendChild(el);
   setTimeout(()=>{ el.style.transition='opacity .3s'; el.style.opacity='0'; setTimeout(()=>el.remove(),300); }, 2200);
-}
-function logActivity(action, cat, detail){
-  state.activityLog.unshift({
-    id:uid(), at:Date.now(), by: state.user?state.user.name:'（未知）', role: state.user?state.user.role:'',
-    action, catId: cat?cat.id:null, catName: cat?cat.name:null, detail: detail||''
-  });
-  if(state.activityLog.length>500) state.activityLog.length = 500;
 }
 
 // ---------------- image compression ----------------
@@ -425,7 +428,7 @@ function compressImage(file){
   });
 }
 
-// ---------------- mock AI service ----------------
+// ---------------- mock AI service (text is generated client-side from filled fields only; swap for a real model call server-side later if needed) ----------------
 function mockAIGenerate(cat){
   const personality = (cat.personalityTags||[]).join('、');
   const traits = [];
@@ -455,9 +458,6 @@ function mockAIFosterLog(text){
   if(!text || !text.trim()) return '（請先輸入今天發生的事，AI 才能協助整理）';
   return `今日中途日常\n\n${text.trim()}\n\n謝謝每一位默默付出的志工，讓這些孩子多一分被理解與陪伴的機會。`;
 }
-
-// ---------------- mock LINE service ----------------
-async function mockLineSend(payload){ await new Promise(r=>setTimeout(r, 700)); return { ok:true, sentAt: Date.now() }; }
 function buildLineContent(cat){
   const lines = [`【${cat.name||'未命名'}】`];
   const meta = [cat.gender, cat.age, cat.color].filter(Boolean).join(' ｜ ');
@@ -480,9 +480,12 @@ function statCounts(){
     home:c.filter(x=>x.status==='已找到家').length };
 }
 function findCat(id){ return state.cats.find(c=>c.id===id); }
-function mainPhoto(cat){ if(!cat.photos.length) return null; return (cat.photos.find(p=>p.isMain)||cat.photos[0]).data; }
-function touch(cat){ cat.updatedAt = Date.now(); }
-function activeVolunteers(){ return state.volunteers.filter(v=>v.active!==false); }
+function mainPhoto(cat){
+  if(cat.mainPhoto !== undefined) return cat.mainPhoto || null; // 前台簡化資料已經算好主要照片
+  if(!cat.photos || !cat.photos.length) return null;
+  return (cat.photos.find(p=>p.isMain)||cat.photos[0]).data;
+}
+function activeVolunteers(){ return (state.publicVolunteers && state.publicVolunteers.length) ? state.publicVolunteers : state.volunteers.filter(v=>v.active!==false); }
 
 // ================= RENDER =================
 function render(){
@@ -497,7 +500,7 @@ function render(){
     bindPublicTop();
     if(isLogin){ view.innerHTML = renderLogin(); bindLogin(); }
     else if(state.view==='public-home'){ view.innerHTML = renderPublicHome(); bindPublicHome(); }
-    else { view.innerHTML = renderPublicDetail(state.publicCatId); bindPublicDetail(); }
+    else { view.innerHTML = renderPublicDetail(); bindPublicDetail(); }
     return;
   }
 
@@ -557,7 +560,7 @@ function renderPublicHome(){
 function publicCatCard(c){
   return `
     <div class="card cat-card" data-open="${c.id}">
-      ${mainPhoto(c)?`<img class="cat-photo" src="${mainPhoto(c)}">`:`<div class="cat-photo-ph">尚無照片</div>`}
+      ${mainPhoto(c)?`<img class="cat-photo" loading="lazy" src="${mainPhoto(c)}">`:`<div class="cat-photo-ph">尚無照片</div>`}
       <div class="cat-body">
         <div class="cat-name">${esc(c.name||'未命名')}</div>
         <div class="cat-meta">${esc([c.gender,c.age].filter(Boolean).join(' ｜ ')||'—')}</div>
@@ -571,37 +574,38 @@ function bindPublicHome(){
   if(s) s.addEventListener('input', e=>{ state.catQuery = e.target.value; document.getElementById('view').innerHTML = renderPublicHome(); bindPublicHome();
     const el=document.getElementById('pubSearch'); el.focus(); el.setSelectionRange(state.catQuery.length,state.catQuery.length); });
   document.querySelectorAll('[data-f]').forEach(b=>b.addEventListener('click', ()=>{ state.catFilter=b.dataset.f; render(); }));
-  document.querySelectorAll('[data-open]').forEach(el=>el.addEventListener('click', ()=>go('public-detail',{publicCatId:el.dataset.open})));
+  document.querySelectorAll('[data-open]').forEach(el=>el.addEventListener('click', ()=>openPublicCatDetail(el.dataset.open)));
 }
 
 // ---------- public detail ----------
-function renderPublicDetail(id){
-  const c = findCat(id);
+function renderPublicDetail(){
+  const c = state.publicCatDetail;
   if(!c) return `<div class="empty">找不到這筆貓咪資料</div>`;
-  const photo = mainPhoto(c);
+  const photos = c.photos || [];
+  const photo = photos[0] || null;
   return `
     <div class="detail-hero">
       ${photo?`<img src="${photo}">`:`<div class="cat-photo-ph" style="aspect-ratio:4/3">尚無照片</div>`}
       <button class="back-btn" id="pdBack">${ICONS.back}</button>
       <div class="detail-hero-overlay"><div class="name">${esc(c.name)}</div>${statusPill(c.status)}</div>
     </div>
-    ${c.photos.length>1?`<div class="card" style="margin-bottom:16px"><div class="thumb-row">${c.photos.map(p=>`<img src="${p.data}">`).join('')}</div></div>`:''}
+    ${photos.length>1?`<div class="card" style="margin-bottom:16px"><div class="thumb-row">${photos.map(p=>`<img src="${p}">`).join('')}</div></div>`:''}
     <div class="section">
       <div class="section-head"><h3>基本資料</h3></div>
       <div class="card kv-grid">
         <div><span class="k">性別</span><span class="v">${esc(c.gender||'—')}</span></div>
         <div><span class="k">年齡</span><span class="v">${esc(c.age||'—')}</span></div>
         <div><span class="k">毛色</span><span class="v">${esc(c.color||'—')}</span></div>
-        <div><span class="k">健康狀況</span><span class="v">${esc(c.health.status||'—')}</span></div>
+        <div><span class="k">健康狀況</span><span class="v">${esc(c.healthStatus||'—')}</span></div>
       </div>
     </div>
     ${c.personalityTags && c.personalityTags.length?`
     <div class="section"><div class="section-head"><h3>個性</h3></div>
       <div class="card tag-row">${c.personalityTags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>
     </div>`:''}
-    ${c.aiContent && c.aiContent.adoptionText?`
+    ${c.adoptionText?`
     <div class="section"><div class="section-head"><h3>認養介紹</h3></div>
-      <div class="card" style="padding:16px;font-size:14px;line-height:1.7;white-space:pre-wrap">${esc(c.aiContent.adoptionText)}</div>
+      <div class="card" style="padding:16px;font-size:14px;line-height:1.7;white-space:pre-wrap">${esc(c.adoptionText)}</div>
     </div>`:''}
     <div class="section">
       <div class="contact-box">💬 對 <b>${esc(c.name)}</b> 有興趣嗎？請透過中途之家的 LINE 官方帳號聯繫志工，我們會盡快回覆您關於認養的細節。</div>
@@ -614,7 +618,7 @@ function renderPublicDetail(id){
   `;
 }
 function bindPublicDetail(){
-  const c = findCat(state.publicCatId);
+  const c = state.publicCatDetail;
   document.getElementById('pdBack').addEventListener('click', ()=>go('public-home'));
   const copyBtn = document.getElementById('copyLinkBtn');
   if(copyBtn) copyBtn.addEventListener('click', async ()=>{
@@ -666,21 +670,35 @@ function renderLogin(){
 }
 function bindLogin(){
   document.querySelectorAll('.login-tabs button').forEach(b=>b.addEventListener('click', ()=>{ state.loginTab=b.dataset.tab; render(); }));
-  document.getElementById('loginBtn').addEventListener('click', ()=>{
-    if(state.loginTab==='admin'){
-      const pw = document.getElementById('loginAdminPw').value;
-      if(pw !== ADMIN_PASSWORD){ toast('管理員密碼錯誤','err'); return; }
-      setState({user:{id:'admin', name:'管理員', role:'管理員'}, view:'dashboard'});
-      toast('歡迎回來，管理員');
-    } else {
-      const volSel = document.getElementById('loginVol');
-      const volId = volSel ? volSel.value : '';
-      const pw = document.getElementById('loginPw').value;
-      const vol = state.volunteers.find(v=>v.id===volId);
-      if(!vol){ toast('請先請管理員新增志工帳號','err'); return; }
-      if(vol.password !== pw){ toast('密碼錯誤','err'); return; }
-      setState({user:{id:vol.id, name:vol.name, role:'志工'}, view:'dashboard'});
-      toast(`歡迎回來，${vol.name}`);
+  const btn = document.getElementById('loginBtn');
+  btn.addEventListener('click', async ()=>{
+    btn.disabled = true; const originalText = btn.textContent; btn.innerHTML = `<span class="spinner"></span> 登入中...`;
+    try{
+      let body;
+      if(state.loginTab==='admin'){
+        const pw = document.getElementById('loginAdminPw').value;
+        if(!pw){ toast('請輸入管理員密碼','err'); return; }
+        body = { role:'admin', password: pw };
+      } else {
+        const volSel = document.getElementById('loginVol');
+        const volId = volSel ? volSel.value : '';
+        const pw = document.getElementById('loginPw').value;
+        if(!volId){ toast('請先請管理員新增志工帳號','err'); return; }
+        if(!pw){ toast('請輸入密碼','err'); return; }
+        body = { role:'volunteer', volunteerId: volId, password: pw };
+      }
+      const res = await apiFetch('/api/auth/login', { method:'POST', auth:false, body });
+      localStorage.setItem(TOKEN_KEY, res.token);
+      localStorage.setItem(USER_KEY, JSON.stringify(res.user));
+      state.user = res.user;
+      await loadInternalData();
+      state.view = 'dashboard';
+      render();
+      toast(`歡迎回來，${res.user.name}`);
+    }catch(e){
+      toast(e.message,'err');
+    }finally{
+      btn.disabled = false; btn.innerHTML = originalText;
     }
   });
 }
@@ -710,7 +728,10 @@ function renderSidebar(){
     <div style="flex:1"></div>
     <div class="side-user"><div class="avatar">${esc((state.user.name||'?').slice(0,1))}</div><div>${esc(state.user.name)}<br><span style="font-size:11px">${esc(state.user.role||'')}</span></div></div>
   `;
-  el.querySelectorAll('[data-nav]').forEach(a=>a.addEventListener('click', ()=>go(a.dataset.nav)));
+  el.querySelectorAll('[data-nav]').forEach(a=>a.addEventListener('click', ()=>{
+    const v = a.dataset.nav;
+    if(v==='activity') openActivityPage(); else if(v==='volunteers') openVolunteersPage(); else go(v);
+  }));
   document.getElementById('sideToPublic').addEventListener('click', ()=>go('public-home'));
 }
 function renderBottomNav(){
@@ -746,7 +767,7 @@ function renderDashboard(){
     <div class="card">
       ${recents.length? recents.map(c=>`
         <div class="recent-row" data-open="${c.id}" style="cursor:pointer">
-          ${mainPhoto(c)?`<img class="recent-thumb" src="${mainPhoto(c)}">`:`<div class="recent-thumb" style="display:flex;align-items:center;justify-content:center;color:var(--text-soft);font-size:11px">無照片</div>`}
+          ${mainPhoto(c)?`<img class="recent-thumb" loading="lazy" src="${mainPhoto(c)}">`:`<div class="recent-thumb" style="display:flex;align-items:center;justify-content:center;color:var(--text-soft);font-size:11px">無照片</div>`}
           <div><div class="recent-name">${esc(c.name)}</div><div class="recent-desc">目前狀態「${esc(c.status)}」</div></div>
           <div class="recent-time">${fmtDate(c.updatedAt)}</div>
         </div>
@@ -778,7 +799,7 @@ function renderCatList(){
 function catCard(c){
   return `
     <div class="card cat-card" data-open="${c.id}">
-      ${mainPhoto(c)?`<img class="cat-photo" src="${mainPhoto(c)}">`:`<div class="cat-photo-ph">尚無照片</div>`}
+      ${mainPhoto(c)?`<img class="cat-photo" loading="lazy" src="${mainPhoto(c)}">`:`<div class="cat-photo-ph">尚無照片</div>`}
       <div class="cat-body">
         <div class="cat-name">${esc(c.name||'未命名')}</div>
         <div class="cat-meta">${esc([c.gender,c.age].filter(Boolean).join(' ｜ ')||'—')}</div>
@@ -798,12 +819,14 @@ function bindCatList(){
 
 // ---------- add cat wizard ----------
 function startAddCat(){
-  setState({view:'addcat', addCat:{
+  state.view = 'addcat';
+  state.addCat = {
     step:1, photos:[], name:'', gender:GENDERS[0], age:AGE_BRACKETS[0], color:COLOR_OPTIONS[0], colorOther:'',
     personalityTags:[], fosterDate:todayInput(), rescueSource:RESCUE_SOURCE_OPTIONS[0], rescueSourceOther:'', status:CARE_STATUSES[0],
     health:{external:TRI[1],vaccine:VACCINE_OPTIONS[0],neuter:TRI[1],chip:TRI[1],status:HEALTH_STATUS_OPTIONS[0],statusOther:'',note:''},
     ai:null, aiLoading:false
-  }});
+  };
+  render();
 }
 function selectField(id, label, options, val, hint){
   return `<div class="field"><label>${label}${hint?`<span class="hint">${hint}</span>`:''}</label>
@@ -889,23 +912,28 @@ function bindAddCat(){
   const prev = document.getElementById('wPrev'); if(prev) prev.addEventListener('click', ()=>{ ac.step--; render(); });
   const next = document.getElementById('wNext'); if(next) next.addEventListener('click', ()=>{ saveStepFields(ac); ac.step++; render(); });
   const save = document.getElementById('wSave');
-  if(save) save.addEventListener('click', ()=>{
+  if(save) save.addEventListener('click', async ()=>{
     if(!ac.name.trim()){ toast('請至少填寫貓咪姓名','err'); ac.step=2; render(); return; }
     const color = ac.color==='其他' ? (ac.colorOther.trim()||'其他') : ac.color;
     const rescueSource = ac.rescueSource==='其他' ? (ac.rescueSourceOther.trim()||'其他') : ac.rescueSource;
     const healthStatus = ac.health.status==='其他' ? (ac.health.statusOther.trim()||'其他') : ac.health.status;
-    const cat = {
-      id: uid(), name: ac.name.trim(), gender: ac.gender, age: ac.age, color, personalityTags: ac.personalityTags.slice(),
+    const body = {
+      name: ac.name.trim(), gender: ac.gender, age: ac.age, color, personalityTags: ac.personalityTags.slice(),
       fosterDate: ac.fosterDate, rescueSource, status: ac.status,
-      health: Object.assign({}, ac.health, {status:healthStatus, records:[]}),
-      fosterLogs: [], adoption:{status:ac.status, history:[{date:todayStr(),status:ac.status,by:state.user.name,note:'建立貓咪檔案。'}]},
-      photos: ac.photos, linePosts: [], aiContent: ac.ai, createdAt: Date.now(), updatedAt: Date.now()
+      health: Object.assign({}, ac.health, {status:healthStatus}),
+      photos: ac.photos, aiContent: ac.ai
     };
-    state.cats.unshift(cat);
-    logActivity('新增貓咪', cat, `建立「${cat.name}」的檔案`);
-    persist();
-    toast(`已建立${cat.name}的資料`);
-    setState({view:'catdetail', currentCatId:cat.id, addCat:null});
+    save.disabled = true; const original = save.innerHTML; save.innerHTML = `<span class="spinner"></span> 建立中...`;
+    try{
+      const cat = await apiFetch('/api/cats', { method:'POST', body });
+      replaceCatInState(cat);
+      toast(`已建立${cat.name}的資料`);
+      state.currentCatId = cat.id; state.addCat = null; state.view = 'catdetail';
+      render();
+    }catch(e){
+      toast(e.message,'err');
+      save.disabled = false; save.innerHTML = original;
+    }
   });
 
   if(ac.step===1){
@@ -994,21 +1022,6 @@ function medCard(m){
     </div>
   `;
 }
-function upsertMedication(c, diseaseRecords){
-  if(!c.medications) c.medications = [];
-  diseaseRecords.forEach(d=>{
-    if(!d.needsMed) return;
-    const n = parseInt(d.totalPacks, 10);
-    if(!n || n<=0) return;
-    const perDay = medPerDay(d.frequency);
-    const existing = c.medications.find(m=>m.disease===d.name);
-    const entry = { id: existing?existing.id:uid(), disease:d.name, totalPacks:n, frequency:d.frequency,
-      perDay, remainingPacks:n, by: state.user.name, startedAt: Date.now() };
-    if(existing) Object.assign(existing, entry);
-    else c.medications.push(entry);
-  });
-}
-
 // ---------- cat detail (internal) ----------
 function renderCatDetail(id){
   const c = findCat(id);
@@ -1079,7 +1092,7 @@ function renderCatDetail(id){
 
     <div class="section"><div class="section-head"><h3>照片</h3><button class="btn btn-ghost btn-sm" id="addPhotoBtn">＋ 新增照片</button></div>
       <div class="card">
-        ${c.photos.length?`<div class="thumb-row">${c.photos.map((p,i)=>`<img src="${p.data}" data-setmain="${i}" style="cursor:pointer;${p.isMain?'outline:2px solid var(--accent)':''}">`).join('')}</div>`:`<div class="empty" style="padding:24px 10px">尚無照片</div>`}
+        ${c.photos.length?`<div class="thumb-row">${c.photos.map((p)=>`<img src="${p.data}" data-setmain="${p.id}" style="cursor:pointer;${p.isMain?'outline:2px solid var(--accent)':''}">`).join('')}</div>`:`<div class="empty" style="padding:24px 10px">尚無照片</div>`}
       </div>
     </div>
 
@@ -1102,18 +1115,20 @@ function bindCatDetail(id){
   document.getElementById('addLogBtn').addEventListener('click', ()=>openFosterLogModal(c));
   document.getElementById('changeStatusBtn').addEventListener('click', ()=>openStatusModal(c));
   document.getElementById('addPhotoBtn').addEventListener('click', ()=>openPhotoModal(c));
-  document.querySelectorAll('[data-setmain]').forEach(img=>img.addEventListener('click', ()=>{
-    c.photos.forEach(p=>p.isMain=false); c.photos[+img.dataset.setmain].isMain=true;
-    touch(c); persist(); render(); toast('已設定主要照片');
+  document.querySelectorAll('[data-setmain]').forEach(img=>img.addEventListener('click', async ()=>{
+    try{
+      const cat = await apiFetch(`/api/cats/${c.id}/actions`, { method:'POST', body:{ action:'set-main-photo', payload:{ photoId: img.dataset.setmain } } });
+      replaceCatInState(cat); render(); toast('已設定主要照片');
+    }catch(e){ toast(e.message,'err'); }
   }));
-  document.querySelectorAll('[data-consume]').forEach(b=>b.addEventListener('click', ()=>{
-    const med = (c.medications||[]).find(x=>x.id===b.dataset.consume);
-    if(med && med.remainingPacks>0){
-      med.remainingPacks--;
-      touch(c); logActivity('記錄用藥', c, `${med.disease}：服用一包，剩餘 ${med.remainingPacks} 包`); persist(); render();
-      if(med.remainingPacks<=5 && med.remainingPacks>0) toast(`${med.disease} 藥量剩餘 ${med.remainingPacks} 包，請盡快回診補藥`,'err');
+  document.querySelectorAll('[data-consume]').forEach(b=>b.addEventListener('click', async ()=>{
+    try{
+      const cat = await apiFetch(`/api/cats/${c.id}/actions`, { method:'POST', body:{ action:'consume-medication', payload:{ medicationId: b.dataset.consume } } });
+      replaceCatInState(cat); render();
+      const med = (cat.medications||[]).find(m=>m.id===b.dataset.consume);
+      if(med && med.remainingPacks<=5 && med.remainingPacks>0) toast(`${med.disease} 藥量剩餘 ${med.remainingPacks} 包，請盡快回診補藥`,'err');
       else toast('已記錄服用');
-    }
+    }catch(e){ toast(e.message,'err'); }
   }));
 }
 
@@ -1207,20 +1222,22 @@ function openHealthModal(c){
       input.value=''; refresh();
     });
     bg.querySelector('#m_cancel').addEventListener('click', ()=>bg.remove());
-    bg.querySelector('#m_save').addEventListener('click', ()=>{
-      const dateRaw = bg.querySelector('#m_date').value; const date = dateRaw? dateRaw.replace(/-/g,'/') : todayStr();
+    bg.querySelector('#m_save').addEventListener('click', async ()=>{
+      const saveBtn = bg.querySelector('#m_save');
+      const date = bg.querySelector('#m_date').value || todayInput();
       const type = bg.querySelector('#m_type').value; const note = bg.querySelector('#m_note').value.trim();
       const diseaseRecords = local.diseases.map(name=>{
         const m = local.med[name] || {needsMed:false};
         return { name, needsMed: !!m.needsMed, totalPacks: m.totalPacks||'', frequency: m.frequency||'一天一次' };
       });
-      c.health.records.push({id:uid(), date, type, volunteer: state.user.name, note, diseases: diseaseRecords});
-      upsertMedication(c, diseaseRecords);
-      touch(c);
-      const diseaseNote = diseaseRecords.length? `；相關疾病：${diseaseRecords.map(d=>d.name).join('、')}` : '';
-      logActivity('新增健康紀錄', c, `${type}：${note||'（無備註）'}${diseaseNote}`);
-      persist(); bg.remove(); render();
-      toast('資料已更新');
+      saveBtn.disabled = true; saveBtn.innerHTML = `<span class="spinner"></span> 儲存中...`;
+      try{
+        const cat = await apiFetch(`/api/cats/${c.id}/actions`, { method:'POST', body:{ action:'health-record', payload:{ date, type, note, diseases: diseaseRecords } } });
+        replaceCatInState(cat); bg.remove(); render();
+        toast('資料已更新');
+      }catch(e){
+        toast(e.message,'err'); saveBtn.disabled=false; saveBtn.textContent='儲存';
+      }
     });
   });
 }
@@ -1240,14 +1257,20 @@ function openFosterLogModal(c){
       const text = bg.querySelector('#m_content').value; const result = mockAIFosterLog(text);
       bg.querySelector('#m_aiResult').innerHTML = `<div class="field" style="margin-top:10px"><textarea id="m_content2" rows="5">${esc(result)}</textarea></div>`;
     });
-    bg.querySelector('#m_save').addEventListener('click', ()=>{
-      const dateRaw = bg.querySelector('#m_date').value; const date = dateRaw? dateRaw.replace(/-/g,'/') : todayStr();
+    bg.querySelector('#m_save').addEventListener('click', async ()=>{
+      const saveBtn = bg.querySelector('#m_save');
+      const date = bg.querySelector('#m_date').value || todayInput();
       const c2 = bg.querySelector('#m_content2');
       const content = (c2 ? c2.value : bg.querySelector('#m_content').value).trim();
       if(!content){ toast('請輸入內容','err'); return; }
-      c.fosterLogs.push({id:uid(), date, content, by: state.user.name});
-      touch(c); logActivity('新增中途紀錄', c, content.slice(0,40)); persist(); bg.remove(); render();
-      toast('資料已更新');
+      saveBtn.disabled = true; saveBtn.innerHTML = `<span class="spinner"></span> 儲存中...`;
+      try{
+        const cat = await apiFetch(`/api/cats/${c.id}/actions`, { method:'POST', body:{ action:'foster-log', payload:{ date, content } } });
+        replaceCatInState(cat); bg.remove(); render();
+        toast('資料已更新');
+      }catch(e){
+        toast(e.message,'err'); saveBtn.disabled=false; saveBtn.textContent='儲存';
+      }
     });
   });
 }
@@ -1259,12 +1282,17 @@ function openStatusModal(c){
     <div class="modal-actions"><button class="btn btn-ghost btn-full" id="m_cancel">取消</button><button class="btn btn-primary btn-full" id="m_save">確認變更</button></div>
   `, (bg)=>{
     bg.querySelector('#m_cancel').addEventListener('click', ()=>bg.remove());
-    bg.querySelector('#m_save').addEventListener('click', ()=>{
+    bg.querySelector('#m_save').addEventListener('click', async ()=>{
+      const saveBtn = bg.querySelector('#m_save');
       const status = bg.querySelector('#m_status').value; const note = bg.querySelector('#m_note').value.trim();
-      c.adoption.status = status; c.adoption.history.push({date:todayStr(), status, by:state.user.name, note});
-      if(CARE_STATUSES.includes(status)) c.status = status;
-      touch(c); logActivity('變更認養狀態', c, `→ ${status}${note?'，備註：'+note:''}`); persist(); bg.remove(); render();
-      toast('資料已更新');
+      saveBtn.disabled = true; saveBtn.innerHTML = `<span class="spinner"></span> 處理中...`;
+      try{
+        const cat = await apiFetch(`/api/cats/${c.id}/actions`, { method:'POST', body:{ action:'adoption-status', payload:{ status, note } } });
+        replaceCatInState(cat); bg.remove(); render();
+        toast('資料已更新');
+      }catch(e){
+        toast(e.message,'err'); saveBtn.disabled=false; saveBtn.textContent='確認變更';
+      }
     });
   });
 }
@@ -1277,16 +1305,36 @@ function openPhotoModal(c){
   `, (bg)=>{
     bg.querySelector('#m_file').addEventListener('change', async (e)=>{
       const files = Array.from(e.target.files||[]);
-      for(const f of files){ try{ const data = await compressImage(f); c.photos.push({data, isMain:c.photos.length===0}); }catch(err){} }
-      touch(c); logActivity('新增照片', c, `新增 ${files.length} 張照片`); persist(); render(); bg.remove();
-      toast('已新增照片');
+      const photos = [];
+      const catHadNoPhotos = !c.photos || c.photos.length===0;
+      for(const f of files){
+        try{
+          const data = await compressImage(f);
+          photos.push({data, isMain: catHadNoPhotos && photos.length===0});
+        }catch(err){}
+      }
+      if(!photos.length) return;
+      try{
+        const cat = await apiFetch(`/api/cats/${c.id}/actions`, { method:'POST', body:{ action:'add-photo', payload:{ photos } } });
+        replaceCatInState(cat); render(); bg.remove();
+        toast('已新增照片');
+      }catch(e){ toast(e.message,'err'); }
     });
     bg.querySelector('#m_close').addEventListener('click', ()=>bg.remove());
   });
 }
 function openLineModal(c){
-  if(!c.aiContent){ c.aiContent = mockAIGenerate(c); }
-  let content = buildLineContent(c);
+  openLineModalAsync(c);
+}
+async function openLineModalAsync(c){
+  if(!c.aiContent){
+    const ai = mockAIGenerate(c);
+    try{
+      const cat = await apiFetch(`/api/cats/${c.id}/actions`, { method:'POST', body:{ action:'save-ai', payload: ai } });
+      replaceCatInState(cat); c = cat;
+    }catch(e){ toast(e.message,'err'); return; }
+  }
+  const content = buildLineContent(c);
   openModal(`
     <h3>發送至 LINE ｜ 預覽</h3>
     <div class="line-preview">
@@ -1302,12 +1350,9 @@ function openLineModal(c){
       btn.disabled=true; btn.innerHTML=`<span class="spinner"></span> 發送中...`;
       bg.querySelector('#m_sendStatus').textContent = '正在透過 LINE 官方帳號發送（模擬）...';
       try{
-        const res = await mockLineSend({catId:c.id, content:text});
-        if(res.ok){
-          c.linePosts.push({id:uid(), content:text, by:state.user.name, sentAt:res.sentAt, status:'success'});
-          touch(c); logActivity('發送 LINE 貼文', c, '已發送'); persist(); bg.remove(); render();
-          toast('已成功發送至 LINE');
-        }
+        const cat = await apiFetch(`/api/cats/${c.id}/actions`, { method:'POST', body:{ action:'line-post', payload:{ content: text } } });
+        replaceCatInState(cat); bg.remove(); render();
+        toast('已成功發送至 LINE');
       }catch(e){
         bg.querySelector('#m_sendStatus').textContent = 'LINE 發送失敗，請確認 LINE 官方帳號設定。';
         btn.disabled=false; btn.innerHTML=`${ICONS.send} 確認發送`;
@@ -1331,10 +1376,19 @@ function renderMore(){
   `;
 }
 function bindMore(){
-  document.querySelectorAll('[data-nav]').forEach(a=>a.addEventListener('click', ()=>go(a.dataset.nav)));
+  document.querySelectorAll('[data-nav]').forEach(a=>a.addEventListener('click', ()=>{
+    const v = a.dataset.nav;
+    if(v==='activity') openActivityPage(); else if(v==='volunteers') openVolunteersPage(); else go(v);
+  }));
   document.getElementById('toPublicLink').addEventListener('click', ()=>go('public-home'));
   document.getElementById('settingsLink').addEventListener('click', ()=>toast('系統設定功能開發中'));
-  document.getElementById('logoutLink').addEventListener('click', ()=>{ setState({user:null, view:'public-home'}); });
+  document.getElementById('logoutLink').addEventListener('click', async ()=>{
+    clearSession();
+    state.user = null; state.cats = []; state.volunteers = []; state.activityLog = [];
+    await loadPublicData();
+    state.view = 'public-home';
+    render();
+  });
 }
 
 // ---------- volunteers (admin manages, all can view) ----------
@@ -1370,14 +1424,20 @@ function bindVolunteers(){
       <div class="modal-actions"><button class="btn btn-ghost btn-full" id="m_cancel">取消</button><button class="btn btn-primary btn-full" id="m_save">新增</button></div>
     `, (bg)=>{
       bg.querySelector('#m_cancel').addEventListener('click', ()=>bg.remove());
-      bg.querySelector('#m_save').addEventListener('click', ()=>{
+      bg.querySelector('#m_save').addEventListener('click', async ()=>{
+        const saveBtn = bg.querySelector('#m_save');
         const name = bg.querySelector('#m_name').value.trim(); const pw = bg.querySelector('#m_pw').value;
         if(!name){ toast('請輸入姓名','err'); return; }
         if(!pw){ toast('請設定密碼','err'); return; }
-        state.volunteers.push({id:uid(), name, password:pw, active:true});
-        logActivity('新增志工帳號', null, `新增志工「${name}」`);
-        persist(); bg.remove(); render();
-        toast('已新增志工帳號');
+        saveBtn.disabled = true; saveBtn.innerHTML = `<span class="spinner"></span> 新增中...`;
+        try{
+          const vol = await apiFetch('/api/volunteers', { method:'POST', body:{ name, password: pw } });
+          state.volunteers.push(vol);
+          bg.remove(); render();
+          toast('已新增志工帳號');
+        }catch(e){
+          toast(e.message,'err'); saveBtn.disabled=false; saveBtn.textContent='新增';
+        }
       });
     });
   });
@@ -1390,19 +1450,27 @@ function bindVolunteers(){
         <div class="modal-actions"><button class="btn btn-ghost btn-full" id="m_cancel">取消</button><button class="btn btn-primary btn-full" id="m_save">儲存</button></div>
       `, (bg)=>{
         bg.querySelector('#m_cancel').addEventListener('click', ()=>bg.remove());
-        bg.querySelector('#m_save').addEventListener('click', ()=>{
+        bg.querySelector('#m_save').addEventListener('click', async ()=>{
+          const saveBtn = bg.querySelector('#m_save');
           const pw = bg.querySelector('#m_pw').value;
           if(!pw){ toast('請輸入新密碼','err'); return; }
-          v.password = pw; logActivity('重設志工密碼', null, `重設「${v.name}」的密碼`);
-          persist(); bg.remove(); render(); toast('密碼已更新');
+          saveBtn.disabled = true; saveBtn.innerHTML = `<span class="spinner"></span> 儲存中...`;
+          try{
+            await apiFetch(`/api/volunteers/${v.id}`, { method:'PATCH', body:{ action:'reset-password', password: pw } });
+            bg.remove(); render(); toast('密碼已更新');
+          }catch(e){
+            toast(e.message,'err'); saveBtn.disabled=false; saveBtn.textContent='儲存';
+          }
         });
       });
     }));
-    document.querySelectorAll('[data-toggle]').forEach(b=>b.addEventListener('click', ()=>{
+    document.querySelectorAll('[data-toggle]').forEach(b=>b.addEventListener('click', async ()=>{
       const v = state.volunteers.find(x=>x.id===b.dataset.toggle);
-      v.active = v.active===false ? true : false;
-      logActivity(v.active?'啟用志工帳號':'停用志工帳號', null, v.name);
-      persist(); render(); toast(v.active?'已啟用帳號':'已停用帳號');
+      try{
+        const res = await apiFetch(`/api/volunteers/${v.id}`, { method:'PATCH', body:{ action:'toggle-active' } });
+        v.active = res.active;
+        render(); toast(v.active?'已啟用帳號':'已停用帳號');
+      }catch(e){ toast(e.message,'err'); }
     }));
   }
 }
@@ -1427,5 +1495,27 @@ function renderActivity(){
 function bindActivity(){}
 
 // ---------------- init ----------------
-(async function init(){ await loadState(); render(); })();
+(async function init(){
+  state = freshState();
+  const token = localStorage.getItem(TOKEN_KEY);
+  const userJson = localStorage.getItem(USER_KEY);
+  if(token && userJson){
+    try{
+      state.user = JSON.parse(userJson);
+      await loadInternalData();
+      state.view = 'dashboard';
+    }catch(e){
+      clearSession();
+      state.user = null;
+      await loadPublicData();
+      state.view = 'public-home';
+    }
+  } else {
+    await loadPublicData();
+  }
+  render();
+})();
 </script>
+
+</body>
+</html>
