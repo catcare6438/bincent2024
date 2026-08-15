@@ -94,6 +94,10 @@
   .btn-secondary{background:var(--secondary);color:var(--text);}
   .btn-ghost{background:transparent;color:var(--text-soft);border:1px solid var(--line);}
   .btn-sm{padding:9px 14px;min-height:36px;font-size:12.5px;}
+  .icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--text-soft);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .1s;}
+  .icon-btn svg{width:18px;height:18px;}
+  .icon-btn:active{transform:scale(.92);}
   .btn-full{width:100%;}
   .btn:active{transform:scale(.97);}
   .btn:disabled{opacity:.5;cursor:not-allowed;}
@@ -225,6 +229,13 @@
   @keyframes flashWarn{0%,100%{opacity:1;}50%{opacity:.3;}}
   .med-warning{animation:flashWarn 1s infinite;color:#B23B3B;font-weight:700;font-size:12.5px;}
   .disease-detail-card{padding:12px 14px;margin-bottom:10px;}
+
+  .lightbox-bg{position:fixed;inset:0;background:rgba(20,17,14,0.94);z-index:300;display:flex;
+    flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px;}
+  .lightbox-img{max-width:92vw;max-height:76vh;object-fit:contain;border-radius:12px;}
+  .lightbox-close{position:absolute;top:calc(16px + env(safe-area-inset-top));right:16px;width:40px;height:40px;border-radius:50%;
+    background:rgba(255,255,255,0.15);color:#fff;border:none;display:flex;align-items:center;justify-content:center;}
+  .lightbox-close svg{width:20px;height:20px;}
 
   .modal-bg{position:fixed;inset:0;background:rgba(64,59,54,0.45);z-index:200;display:flex;
     align-items:flex-end;justify-content:center;}
@@ -498,17 +509,6 @@ function mockAIFosterLog(text){
   if(!text || !text.trim()) return '（請先輸入今天發生的事，AI 才能協助整理）';
   return `今日中途日常\n\n${text.trim()}\n\n謝謝每一位默默付出的志工，讓這些孩子多一分被理解與陪伴的機會。`;
 }
-function buildLineContent(cat){
-  const lines = [`【${cat.name||'未命名'}】`];
-  const meta = [cat.gender, cat.age, cat.color].filter(Boolean).join(' ｜ ');
-  if(meta) lines.push(meta);
-  if(cat.personalityTags && cat.personalityTags.length) lines.push(`個性：${cat.personalityTags.join('、')}`);
-  if(cat.health.status) lines.push(`健康狀況：${cat.health.status}`);
-  lines.push(`目前狀態：${cat.adoption.status || cat.status}`);
-  if(cat.aiContent && cat.aiContent.adoptionText) lines.push('', cat.aiContent.adoptionText);
-  lines.push('', '💬 有興趣認養歡迎私訊粉專，謝謝您願意給孩子一個家。');
-  return lines.join('\n');
-}
 
 // ---------------- derived ----------------
 function recentUpdates(n){ return [...state.cats].sort((a,b)=>b.updatedAt-a.updatedAt).slice(0,n||5); }
@@ -564,7 +564,7 @@ function renderPublicTop(){
   return `
     <div class="brand">🐾 浪貓不浪｜認養專區</div>
     ${state.view==='login' ? `<button class="btn btn-ghost btn-sm" id="pubBack">${ICONS.back} 返回</button>`
-      : `<button class="btn btn-secondary btn-sm" id="pubLoginBtn">${ICONS.lock} 志工登入</button>`}
+      : `<button class="icon-btn" id="pubLoginBtn" title="志工登入" aria-label="志工登入">${ICONS.lock}</button>`}
   `;
 }
 function bindPublicTop(){
@@ -625,11 +625,11 @@ function renderPublicDetail(){
   const photo = photos[0] || null;
   return `
     <div class="detail-hero">
-      ${photo?`<img src="${photo}">`:`<div class="cat-photo-ph" style="aspect-ratio:4/3">尚無照片</div>`}
+      ${photo?`<img src="${photo}" data-lb="${photo}" style="cursor:pointer">`:`<div class="cat-photo-ph" style="aspect-ratio:4/3">尚無照片</div>`}
       <button class="back-btn" id="pdBack">${ICONS.back}</button>
       <div class="detail-hero-overlay"><div class="name">${esc(c.name)}</div>${statusPill(c.status)}</div>
     </div>
-    ${photos.length>1?`<div class="card" style="margin-bottom:16px"><div class="thumb-row">${photos.map(p=>`<img src="${p}">`).join('')}</div></div>`:''}
+    ${photos.length>1?`<div class="card" style="margin-bottom:16px"><div class="thumb-row">${photos.map(p=>`<img src="${p}" data-lb="${p}" style="cursor:pointer">`).join('')}</div></div>`:''}
     <div class="section">
       <div class="section-head"><h3>基本資料</h3></div>
       <div class="card kv-grid">
@@ -660,6 +660,7 @@ function renderPublicDetail(){
 function bindPublicDetail(){
   const c = state.publicCatDetail;
   document.getElementById('pdBack').addEventListener('click', ()=>go('public-home'));
+  document.querySelectorAll('[data-lb]').forEach(img=>img.addEventListener('click', ()=>openLightbox(img.dataset.lb)));
   const copyBtn = document.getElementById('copyLinkBtn');
   if(copyBtn) copyBtn.addEventListener('click', async ()=>{
     const url = window.location.href;
@@ -671,9 +672,31 @@ function bindPublicDetail(){
     }
   });
   const lineBtn = document.getElementById('shareLineBtn');
-  if(lineBtn) lineBtn.addEventListener('click', ()=>{
+  if(lineBtn) lineBtn.addEventListener('click', async ()=>{
     const url = window.location.href;
-    const text = c ? `我在浪貓不浪看到「${c.name}」，一起來看看吧！` : '一起來看看浪貓不浪的貓咪吧！';
+    const info = c ? [c.gender, c.age, c.color].filter(Boolean).join(' ｜ ') : '';
+    const text = c
+      ? `【${c.name}】${info?'\n'+info:''}\n目前狀態：${c.status}\n一起來看看浪貓不浪的貓咪吧！`
+      : '一起來看看浪貓不浪的貓咪吧！';
+    const photoUrl = (c && c.photos && c.photos[0]) || null;
+
+    if(navigator.share){
+      try{
+        const shareData = { title: c?c.name+' 正在等待一個家':'浪貓不浪', text, url };
+        if(photoUrl && navigator.canShare){
+          try{
+            const resp = await fetch(photoUrl);
+            const blob = await resp.blob();
+            const file = new File([blob], (c?c.name:'cat')+'.jpg', { type: blob.type || 'image/jpeg' });
+            if(navigator.canShare({ files:[file] })) shareData.files = [file];
+          }catch(e){}
+        }
+        await navigator.share(shareData);
+        return;
+      }catch(e){
+        if(e && e.name==='AbortError') return;
+      }
+    }
     const shareUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
     window.open(shareUrl, '_blank', 'noopener');
   });
@@ -1069,11 +1092,10 @@ function renderCatDetail(id){
   const photo = mainPhoto(c);
   return `
     <div class="detail-hero">
-      ${photo?`<img src="${photo}">`:`<div class="cat-photo-ph" style="aspect-ratio:4/3">尚無照片</div>`}
+      ${photo?`<img src="${photo}" data-lb="${photo}" style="cursor:pointer">`:`<div class="cat-photo-ph" style="aspect-ratio:4/3">尚無照片</div>`}
       <button class="back-btn" id="backBtn">${ICONS.back}</button>
       <div class="detail-hero-overlay"><div class="name">${esc(c.name)}</div>${statusPill(c.status)}</div>
     </div>
-    <div class="detail-actions"><button class="btn btn-primary btn-full" id="lineBtn">${ICONS.send} 發送至 LINE</button></div>
 
     <div class="section"><div class="section-head"><h3>基本資料</h3></div>
       <div class="card kv-grid">
@@ -1132,17 +1154,7 @@ function renderCatDetail(id){
 
     <div class="section"><div class="section-head"><h3>照片</h3><button class="btn btn-ghost btn-sm" id="addPhotoBtn">＋ 新增照片</button></div>
       <div class="card">
-        ${c.photos.length?`<div class="thumb-row">${c.photos.map((p)=>`<img src="${p.data}" data-setmain="${p.id}" style="cursor:pointer;${p.isMain?'outline:2px solid var(--accent)':''}">`).join('')}</div>`:`<div class="empty" style="padding:24px 10px">尚無照片</div>`}
-      </div>
-    </div>
-
-    <div class="section"><div class="section-head"><h3>LINE 發布紀錄</h3></div>
-      <div class="card">
-        ${c.linePosts.length? [...c.linePosts].sort((a,b)=>b.sentAt-a.sentAt).map(p=>`
-          <div class="log-item"><div class="log-date">${fmtDate(p.sentAt)}</div>
-          <div class="log-title">發布人：${esc(p.by)}　·　<span class="pill" style="background:var(--green-bg);color:var(--green)">發送成功</span></div>
-          <div class="log-note" style="white-space:pre-wrap">${esc(p.content.slice(0,80))}${p.content.length>80?'...':''}</div></div>
-        `).join('') : `<div class="empty" style="padding:24px 10px">尚無 LINE 發布紀錄</div>`}
+        ${c.photos.length?`<div class="thumb-row">${c.photos.map((p)=>`<img src="${p.data}" data-photo="${p.data}" data-photoid="${p.id}" data-ismain="${p.isMain?'1':''}" style="cursor:pointer;${p.isMain?'outline:2px solid var(--accent)':''}">`).join('')}</div>`:`<div class="empty" style="padding:24px 10px">尚無照片</div>`}
       </div>
     </div>
   `;
@@ -1150,16 +1162,23 @@ function renderCatDetail(id){
 function bindCatDetail(id){
   const c = findCat(id);
   document.getElementById('backBtn').addEventListener('click', ()=>go('cats'));
-  document.getElementById('lineBtn').addEventListener('click', ()=>openLineModal(c));
+  const heroImg = document.querySelector('.detail-hero [data-lb]');
+  if(heroImg) heroImg.addEventListener('click', ()=>openLightbox(heroImg.dataset.lb));
   document.getElementById('addHealthBtn').addEventListener('click', ()=>openHealthModal(c));
   document.getElementById('addLogBtn').addEventListener('click', ()=>openFosterLogModal(c));
   document.getElementById('changeStatusBtn').addEventListener('click', ()=>openStatusModal(c));
   document.getElementById('addPhotoBtn').addEventListener('click', ()=>openPhotoModal(c));
-  document.querySelectorAll('[data-setmain]').forEach(img=>img.addEventListener('click', async ()=>{
-    try{
-      const cat = await apiFetch(`/api/cats/${c.id}/actions`, { method:'POST', body:{ action:'set-main-photo', payload:{ photoId: img.dataset.setmain } } });
-      replaceCatInState(cat); render(); toast('已設定主要照片');
-    }catch(e){ toast(e.message,'err'); }
+  document.querySelectorAll('[data-photo]').forEach(img=>img.addEventListener('click', ()=>{
+    const isMain = img.dataset.ismain === '1';
+    openLightbox(img.dataset.photo, {
+      setMainLabel: isMain ? null : '設為主要照片',
+      onSetMain: isMain ? null : async ()=>{
+        try{
+          const cat = await apiFetch(`/api/cats/${c.id}/actions`, { method:'POST', body:{ action:'set-main-photo', payload:{ photoId: img.dataset.photoid } } });
+          replaceCatInState(cat); render(); toast('已設定主要照片');
+        }catch(e){ toast(e.message,'err'); }
+      }
+    });
   }));
   document.querySelectorAll('[data-consume]').forEach(b=>b.addEventListener('click', async ()=>{
     try{
@@ -1178,6 +1197,21 @@ function openModal(html, onMount){
   bg.innerHTML = `<div class="modal">${html}</div>`;
   bg.addEventListener('click', (e)=>{ if(e.target===bg) bg.remove(); });
   document.body.appendChild(bg); onMount && onMount(bg); return bg;
+}
+function openLightbox(src, opts){
+  opts = opts || {};
+  const bg = document.createElement('div'); bg.className='lightbox-bg';
+  bg.innerHTML = `
+    <button class="lightbox-close" id="lbClose">${ICONS.x}</button>
+    <img src="${src}" class="lightbox-img">
+    ${opts.setMainLabel?`<button class="btn btn-primary" id="lbSetMain">${opts.setMainLabel}</button>`:''}
+  `;
+  bg.addEventListener('click', (e)=>{ if(e.target===bg) bg.remove(); });
+  document.body.appendChild(bg);
+  bg.querySelector('#lbClose').addEventListener('click', ()=>bg.remove());
+  if(opts.onSetMain){
+    bg.querySelector('#lbSetMain').addEventListener('click', async ()=>{ await opts.onSetMain(); bg.remove(); });
+  }
 }
 function diseaseChipsHTML(local){
   const all = DISEASE_LIST.concat(local.extraCustom);
@@ -1363,43 +1397,6 @@ function openPhotoModal(c){
     bg.querySelector('#m_close').addEventListener('click', ()=>bg.remove());
   });
 }
-function openLineModal(c){
-  openLineModalAsync(c);
-}
-async function openLineModalAsync(c){
-  if(!c.aiContent){
-    const ai = mockAIGenerate(c);
-    try{
-      const cat = await apiFetch(`/api/cats/${c.id}/actions`, { method:'POST', body:{ action:'save-ai', payload: ai } });
-      replaceCatInState(cat); c = cat;
-    }catch(e){ toast(e.message,'err'); return; }
-  }
-  const content = buildLineContent(c);
-  openModal(`
-    <h3>發送至 LINE ｜ 預覽</h3>
-    <div class="line-preview">
-      ${mainPhoto(c)?`<img src="${mainPhoto(c)}">`:''}
-      <div class="line-preview-body"><textarea id="m_lineContent" rows="9" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13.5px;line-height:1.6">${esc(content)}</textarea></div>
-    </div>
-    <div id="m_sendStatus" style="font-size:12.5px;color:var(--text-soft);margin-bottom:10px"></div>
-    <div class="modal-actions"><button class="btn btn-ghost btn-full" id="m_cancel">取消</button><button class="btn btn-primary btn-full" id="m_send">${ICONS.send} 確認發送</button></div>
-  `, (bg)=>{
-    bg.querySelector('#m_cancel').addEventListener('click', ()=>bg.remove());
-    bg.querySelector('#m_send').addEventListener('click', async ()=>{
-      const btn = bg.querySelector('#m_send'); const text = bg.querySelector('#m_lineContent').value;
-      btn.disabled=true; btn.innerHTML=`<span class="spinner"></span> 發送中...`;
-      bg.querySelector('#m_sendStatus').textContent = '正在透過 LINE 官方帳號發送（模擬）...';
-      try{
-        const cat = await apiFetch(`/api/cats/${c.id}/actions`, { method:'POST', body:{ action:'line-post', payload:{ content: text } } });
-        replaceCatInState(cat); bg.remove(); render();
-        toast('已成功發送至 LINE');
-      }catch(e){
-        bg.querySelector('#m_sendStatus').textContent = 'LINE 發送失敗，請確認 LINE 官方帳號設定。';
-        btn.disabled=false; btn.innerHTML=`${ICONS.send} 確認發送`;
-      }
-    });
-  });
-}
 
 // ---------- more ----------
 function renderMore(){
@@ -1522,17 +1519,28 @@ function renderActivity(){
     <div class="page-sub">共 ${log.length} 筆異動紀錄，可看到每一筆操作是由哪位志工／管理員完成</div>
     <div class="card">
       ${log.length? log.map(a=>`
-        <div class="log-item">
+        <div class="log-item" style="position:relative;padding-right:56px">
           <div class="log-date">${fmtDate(a.at)}</div>
           <div class="log-title">${esc(a.action)}${a.catName?`　·　${esc(a.catName)}`:''}</div>
           ${a.detail?`<div class="log-note">${esc(a.detail)}</div>`:''}
           <div class="log-by">操作人員：${esc(a.by)}${a.role?`（${esc(a.role)}）`:''}</div>
+          <button class="icon-btn" data-delact="${a.id}" title="刪除這筆紀錄" style="position:absolute;top:14px;right:16px;width:32px;height:32px">${ICONS.x}</button>
         </div>
       `).join('') : `<div class="empty" style="padding:24px 10px">尚無異動紀錄</div>`}
     </div>
   `;
 }
-function bindActivity(){}
+function bindActivity(){
+  document.querySelectorAll('[data-delact]').forEach(b=>b.addEventListener('click', async ()=>{
+    if(!confirm('確定要刪除這筆異動紀錄嗎？此動作無法復原。')) return;
+    try{
+      await apiFetch(`/api/activity/${b.dataset.delact}`, { method:'DELETE' });
+      state.activityLog = state.activityLog.filter(a=>a.id!==b.dataset.delact);
+      render();
+      toast('已刪除');
+    }catch(e){ toast(e.message,'err'); }
+  }));
+}
 
 // ---------------- init ----------------
 (async function init(){
