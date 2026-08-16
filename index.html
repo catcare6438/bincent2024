@@ -700,22 +700,12 @@ function bindPublicDetail(){
     const url = window.location.href;
     const info = c ? [c.gender, c.age, c.color].filter(Boolean).join(' ｜ ') : '';
     const text = c
-      ? `【${c.name}】${info?'\n'+info:''}\n目前狀態：${c.status}\n一起來看看浪貓不浪的貓咪吧！`
+      ? `【${c.name}】${info?'\n'+info:''}\n目前狀態：${c.status}\n點連結看看${c.name}的完整資料吧！`
       : '一起來看看浪貓不浪的貓咪吧！';
-    const photoUrl = (c && c.photos && c.photos[0]) || null;
 
     if(navigator.share){
       try{
-        const shareData = { title: c?c.name+' 正在等待一個家':'浪貓不浪', text, url };
-        if(photoUrl && navigator.canShare){
-          try{
-            const resp = await fetch(photoUrl);
-            const blob = await resp.blob();
-            const file = new File([blob], (c?c.name:'cat')+'.jpg', { type: blob.type || 'image/jpeg' });
-            if(navigator.canShare({ files:[file] })) shareData.files = [file];
-          }catch(e){}
-        }
-        await navigator.share(shareData);
+        await navigator.share({ title: c?c.name+' 正在等待一個家':'浪貓不浪', text, url });
         return;
       }catch(e){
         if(e && e.name==='AbortError') return;
