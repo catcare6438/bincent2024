@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>浪貓不浪|領養代替購買</title>
+<title>浪貓不浪｜中途管理系統</title>
 <meta name="description" content="動物中途之家管理系統：貓咪資料、健康紀錄、用藥追蹤、認養管理與 LINE 發布">
 <meta name="theme-color" content="#F7F3ED">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1148,10 +1148,12 @@ function renderCatDetail(id){
       </div>
       <div class="card" style="margin-top:10px">
         ${c.health.records.length? [...c.health.records].sort((a,b)=>b.date.localeCompare(a.date)).map(r=>`
-          <div class="log-item"><div class="log-date">${esc(r.date)}</div><div class="log-title">${esc(r.type)}</div>
+          <div class="log-item" style="position:relative;${state.user.role==='管理員'?'padding-right:56px':''}"><div class="log-date">${esc(r.date)}</div><div class="log-title">${esc(r.type)}</div>
           ${r.note?`<div class="log-note">${esc(r.note)}</div>`:''}
           ${r.diseases && r.diseases.length?`<div class="log-note">相關疾病：${r.diseases.map(d=>esc(d.name)+(d.needsMed?'（需用藥）':'')).join('、')}</div>`:''}
-          <div class="log-by">志工：${esc(r.volunteer)}</div></div>
+          <div class="log-by">志工：${esc(r.volunteer)}</div>
+          ${state.user.role==='管理員'?`<button class="icon-btn" data-edithealth="${r.id}" title="編輯這筆紀錄" style="position:absolute;top:14px;right:16px;width:32px;height:32px">${ICONS.edit}</button>`:''}
+          </div>
         `).join('') : `<div class="empty" style="padding:24px 10px">尚無健康紀錄</div>`}
       </div>
     </div>
@@ -1189,6 +1191,10 @@ function bindCatDetail(id){
   const c = findCat(id);
   document.getElementById('backBtn').addEventListener('click', ()=>go('cats'));
   document.getElementById('addHealthBtn').addEventListener('click', ()=>openHealthModal(c));
+  document.querySelectorAll('[data-edithealth]').forEach(b=>b.addEventListener('click', ()=>{
+    const record = c.health.records.find(r=>r.id===b.dataset.edithealth);
+    if(record) openHealthModal(c, record);
+  }));
   document.getElementById('addLogBtn').addEventListener('click', ()=>openFosterLogModal(c));
   document.getElementById('changeStatusBtn').addEventListener('click', ()=>openStatusModal(c));
   document.getElementById('addPhotoBtn').addEventListener('click', ()=>openPhotoModal(c));
@@ -1306,17 +1312,29 @@ function diseaseDetailHTML(local){
     `;
   }).join('');
 }
-function openHealthModal(c){
+function openHealthModal(c, existingRecord){
+  const isEdit = !!existingRecord;
   const local = { diseases:[], extraCustom:[], med:{} };
+  if(isEdit && existingRecord.diseases){
+    existingRecord.diseases.forEach(function(d){
+      local.diseases.push(d.name);
+      local.med[d.name] = { needsMed: !!d.needsMed, totalPacks: d.totalPacks||'', frequency: d.frequency||'一天一次' };
+      if(DISEASE_LIST.indexOf(d.name)<0) local.extraCustom.push(d.name);
+    });
+  }
+  const initDate = isEdit ? (existingRecord.date||'').replace(/\//g,'-') : todayInput();
+  const initType = isEdit ? existingRecord.type : HEALTH_RECORD_TYPES[0];
+  const initNote = isEdit ? (existingRecord.note||'') : '';
+
   const bg = openModal(`
-    <h3>新增健康紀錄</h3>
-    <div class="field"><label>日期</label><input type="date" id="m_date" value="${todayInput()}"></div>
-    ${selectField('m_type','類型', HEALTH_RECORD_TYPES, HEALTH_RECORD_TYPES[0])}
-    <div class="field"><label>備註</label><textarea id="m_note" placeholder="例如：精神食慾正常"></textarea></div>
+    <h3>${isEdit?'編輯健康紀錄':'新增健康紀錄'}</h3>
+    <div class="field"><label>日期</label><input type="date" id="m_date" value="${esc(initDate)}"></div>
+    ${selectField('m_type','類型', HEALTH_RECORD_TYPES, initType)}
+    <div class="field"><label>備註</label><textarea id="m_note" placeholder="例如：精神食慾正常">${esc(initNote)}</textarea></div>
     <div class="field">
       <label>相關疾病 <span class="hint">可複選，清單沒有可自行輸入</span></label>
       <div class="chip-grid" id="diseaseChipsWrap">${diseaseChipsHTML(local)}</div>
-      <div class="chip-count" id="diseaseCount">已選擇 0 項</div>
+      <div class="chip-count" id="diseaseCount">已選擇 ${local.diseases.length} 項</div>
     </div>
     <div class="field">
       <div style="display:flex;gap:8px">
@@ -1326,6 +1344,7 @@ function openHealthModal(c){
     </div>
     <div id="diseaseDetails">${diseaseDetailHTML(local)}</div>
     <div class="modal-actions"><button class="btn btn-ghost btn-full" id="m_cancel">取消</button><button class="btn btn-primary btn-full" id="m_save">儲存</button></div>
+    ${isEdit?`<button class="btn btn-full" id="m_delete" style="margin-top:10px;color:#B23B3B;border:1px solid #E9C9C4;background:#fff">${ICONS.x} 刪除這筆紀錄</button>`:''}
   `, (bg)=>{
     function refresh(){
       bg.querySelector('#diseaseChipsWrap').innerHTML = diseaseChipsHTML(local);
@@ -1364,14 +1383,28 @@ function openHealthModal(c){
         return { name, needsMed: !!m.needsMed, totalPacks: m.totalPacks||'', frequency: m.frequency||'一天一次' };
       });
       saveBtn.disabled = true; saveBtn.innerHTML = `<span class="spinner"></span> 儲存中...`;
+      const action = isEdit ? 'edit-health-record' : 'health-record';
+      const payload = isEdit
+        ? { recordId: existingRecord.id, date, type, note, diseases: diseaseRecords }
+        : { date, type, note, diseases: diseaseRecords };
       try{
-        const cat = await apiFetch(`/api/cats/${c.id}/actions`, { method:'POST', body:{ action:'health-record', payload:{ date, type, note, diseases: diseaseRecords } } });
+        const cat = await apiFetch(`/api/cats/${c.id}/actions`, { method:'POST', body:{ action, payload } });
         replaceCatInState(cat); bg.remove(); render();
         toast('資料已更新');
       }catch(e){
         toast(e.message,'err'); saveBtn.disabled=false; saveBtn.textContent='儲存';
       }
     });
+    if(isEdit){
+      bg.querySelector('#m_delete').addEventListener('click', async ()=>{
+        if(!confirm('確定要刪除這筆健康紀錄嗎？此動作無法復原。')) return;
+        try{
+          const cat = await apiFetch(`/api/cats/${c.id}/actions`, { method:'POST', body:{ action:'delete-health-record', payload:{ recordId: existingRecord.id } } });
+          replaceCatInState(cat); bg.remove(); render();
+          toast('已刪除');
+        }catch(e){ toast(e.message,'err'); }
+      });
+    }
   });
 }
 function openFosterLogModal(c){
