@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>浪貓不浪｜領養代替購買</title>
+<title>浪貓不浪｜中途管理系統</title>
 <meta name="description" content="動物中途之家管理系統：貓咪資料、健康紀錄、用藥追蹤、認養管理與 LINE 發布">
 <meta name="theme-color" content="#F7F3ED">
 <meta name="mobile-web-app-capable" content="yes">
@@ -596,25 +596,17 @@ function bindPublicTop(){
 
 // ---------- public home ----------
 function renderPublicHome(){
-  const q = (state.catQuery||'').trim();
-  const f = state.catFilter||'全部';
-  let list = state.cats;
-  if(f!=='全部') list = list.filter(c=>c.status===f);
-  if(q) list = list.filter(c=>[c.name,c.color,c.gender,c.status].some(v=>v&&v.includes(q)));
+  const list = state.cats;
   return `
     <div class="pub-hero">
-      <h1>目前共有 ${state.cats.length} 隻中途貓咪</h1>
+      <h1>目前共有 ${list.length} 隻中途貓咪</h1>
       <p>這裡列出所有中途貓咪的基本資料，想認養請透過所屬中途志工的 LINE 聯繫。
         <a href="${LINE_OFFICIAL_URL}" target="_blank" rel="noopener" style="color:var(--accent-deep);font-weight:600">點此加 LINE 好友</a>
       </p>
     </div>
     <div style="padding:0 20px">
-      <div class="search-row"><input type="text" id="pubSearch" placeholder="搜尋姓名、毛色..." value="${esc(q)}"></div>
-      <div class="filter-row">
-        ${['全部',...CARE_STATUSES].map(x=>`<button class="filter-chip ${f===x?'active':''}" data-f="${x}">${x}</button>`).join('')}
-      </div>
       ${list.length? `<div class="cat-grid">${list.map(publicCatCard).join('')}</div>` : `
-        <div class="empty">${ICONS.paw_off}<p>${q||f!=='全部'?'找不到符合條件的貓咪':'目前還沒有貓咪資料'}</p></div>
+        <div class="empty">${ICONS.paw_off}<p>目前還沒有貓咪資料</p></div>
       `}
     </div>
   `;
@@ -632,10 +624,6 @@ function publicCatCard(c){
   `;
 }
 function bindPublicHome(){
-  const s = document.getElementById('pubSearch');
-  if(s) s.addEventListener('input', e=>{ state.catQuery = e.target.value; document.getElementById('view').innerHTML = renderPublicHome(); bindPublicHome();
-    const el=document.getElementById('pubSearch'); el.focus(); el.setSelectionRange(state.catQuery.length,state.catQuery.length); });
-  document.querySelectorAll('[data-f]').forEach(b=>b.addEventListener('click', ()=>{ state.catFilter=b.dataset.f; render(); }));
   document.querySelectorAll('[data-open]').forEach(el=>el.addEventListener('click', ()=>openPublicCatDetail(el.dataset.open)));
 }
 
