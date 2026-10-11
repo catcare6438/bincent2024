@@ -573,7 +573,7 @@ function render(){
 
   if(state.view==='dashboard'){ view.innerHTML = renderDashboard(); bindDashboard(); }
   else if(state.view==='cats'){ view.innerHTML = renderCatList(); bindCatList(); }
-  else if(state.view==='addcat'){ view.innerHTML = renderAddCat(); bindAddCat(); }
+  else if(state.view==='addcat'){ if(!state.addCat){ startAddCat(); return; } view.innerHTML = renderAddCat(); bindAddCat(); }
   else if(state.view==='catdetail'){ view.innerHTML = renderCatDetail(state.currentCatId); bindCatDetail(state.currentCatId); }
   else if(state.view==='more'){ view.innerHTML = renderMore(); bindMore(); }
   else if(state.view==='volunteers'){ view.innerHTML = renderVolunteers(); bindVolunteers(); }
@@ -796,7 +796,7 @@ function renderSidebar(){
   `;
   el.querySelectorAll('[data-nav]').forEach(a=>a.addEventListener('click', ()=>{
     const v = a.dataset.nav;
-    if(v==='activity') openActivityPage(); else if(v==='volunteers') openVolunteersPage(); else go(v);
+    if(v==='activity') openActivityPage(); else if(v==='volunteers') openVolunteersPage(); else if(v==='addcat') startAddCat(); else go(v);
   }));
   document.getElementById('sideToPublic').addEventListener('click', ()=>go('public-home'));
 }
@@ -1610,7 +1610,7 @@ function renderMore(){
 function bindMore(){
   document.querySelectorAll('[data-nav]').forEach(a=>a.addEventListener('click', ()=>{
     const v = a.dataset.nav;
-    if(v==='activity') openActivityPage(); else if(v==='volunteers') openVolunteersPage(); else go(v);
+    if(v==='activity') openActivityPage(); else if(v==='volunteers') openVolunteersPage(); else if(v==='addcat') startAddCat(); else go(v);
   }));
   document.getElementById('toPublicLink').addEventListener('click', ()=>go('public-home'));
   document.getElementById('settingsLink').addEventListener('click', ()=>toast('系統設定功能開發中'));
