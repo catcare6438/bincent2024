@@ -26,7 +26,11 @@
     font-family:'Noto Sans TC',-apple-system,BlinkMacSystemFont,sans-serif;-webkit-font-smoothing:antialiased;}
   #root{max-width:1200px;margin:0 auto;min-height:100vh;position:relative;display:flex;}
   button{font-family:inherit;cursor:pointer;}
-  input,textarea,select{font-family:inherit;}
+  input,textarea,select,button{font-family:inherit;}
+  input,textarea,select{color:var(--text);}
+  button{color:inherit;}
+  :root{color-scheme:light;}
+  @media (prefers-color-scheme:dark){:root{color-scheme:dark;}}
   a{color:inherit;text-decoration:none;}
 
   #sidebar{width:220px;flex-shrink:0;display:none;flex-direction:column;padding:28px 16px;
@@ -52,6 +56,7 @@
     #bottomnav{background:rgba(44,40,35,0.85);}
     .upload-slot{background:#332E28;}
   }
+  @media (prefers-color-scheme:dark){#topbar{background:rgba(34,31,27,0.85) !important;}#bottomnav{background:rgba(44,40,35,0.92) !important;}}
   #splash{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:9999;}
   #splash .splash-logo{width:64px;height:64px;border-radius:20px;background:var(--accent);color:#fff;
     display:flex;align-items:center;justify-content:center;font-size:28px;box-shadow:0 8px 22px rgba(154,128,104,0.35);
@@ -94,7 +99,7 @@
   .btn-secondary{background:var(--secondary);color:var(--text);}
   .btn-ghost{background:transparent;color:var(--text-soft);border:1px solid var(--line);}
   .btn-sm{padding:9px 14px;min-height:36px;font-size:12.5px;}
-  .icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--text-soft);
+  .icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--bg-card);color:var(--text-soft);
     display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .1s;}
   .icon-btn svg{width:18px;height:18px;}
   .icon-btn:active{transform:scale(.92);}
@@ -106,24 +111,24 @@
   .field label{display:block;font-size:13px;font-weight:600;margin-bottom:7px;color:var(--text);}
   .field .hint{font-size:12px;color:var(--text-soft);font-weight:400;margin-left:6px;}
   .field input[type=text],.field input[type=password],.field input[type=date],.field textarea,.field select{
-    width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;
+    width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card);
     font-size:16px;color:var(--text);appearance:none;-webkit-appearance:none;}
   .field select{background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="%238A8177" stroke-width="2"><path d="M4 6l4 4 4-4"/></svg>');
     background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;}
   .field textarea{resize:vertical;min-height:80px;line-height:1.6;}
   .field input:focus,.field textarea:focus,.field select:focus{outline:2px solid var(--accent);outline-offset:1px;}
   .seg{display:flex;gap:8px;flex-wrap:wrap;}
-  .seg button{padding:11px 16px;min-height:42px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:13.5px;
+  .seg button{padding:11px 16px;min-height:42px;border-radius:10px;border:1px solid var(--line);background:var(--bg-card);font-size:13.5px;
     color:var(--text-soft);font-weight:500;}
-  .seg button.active{background:var(--text);color:#fff;border-color:var(--text);}
+  .seg button.active{background:var(--text);color:var(--bg);border-color:var(--text);}
   .chip-grid{display:flex;flex-wrap:wrap;gap:8px;}
-  .chip{padding:10px 15px;min-height:40px;border-radius:20px;border:1px solid var(--line);background:#fff;font-size:13px;
+  .chip{padding:10px 15px;min-height:40px;border-radius:20px;border:1px solid var(--line);background:var(--bg-card);font-size:13px;
     color:var(--text-soft);font-weight:500;}
   .chip.active{background:var(--accent);color:#fff;border-color:var(--accent);}
   .chip-count{font-size:12px;color:var(--text-soft);margin-top:6px;}
   .toast-wrap{position:fixed;bottom:90px;left:0;right:0;display:flex;justify-content:center;z-index:100;pointer-events:none;}
   @media (min-width:900px){.toast-wrap{bottom:24px;}}
-  .toast{background:var(--text);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;
+  .toast{background:var(--text);color:var(--bg);padding:12px 20px;border-radius:10px;font-size:13px;
     box-shadow:0 6px 20px rgba(0,0,0,0.18);animation:toastin .25s ease;max-width:88%;}
   .toast.err{background:#8A4B3F;}
   @keyframes toastin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
@@ -142,19 +147,19 @@
   .recent-time{font-size:11.5px;color:var(--text-soft);margin-left:auto;flex-shrink:0;}
   .quick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
   @media (min-width:640px){.quick-grid{grid-template-columns:repeat(4,1fr);}}
-  .quick-btn{padding:16px 10px;display:flex;flex-direction:column;align-items:center;gap:8px;background:#fff;
+  .quick-btn{padding:16px 10px;display:flex;flex-direction:column;align-items:center;gap:8px;background:var(--bg-card);
     border:1px solid var(--line);border-radius:var(--radius);font-size:13px;font-weight:600;color:var(--text);transition:transform .1s;}
   .quick-btn svg{width:20px;height:20px;color:var(--accent-deep);}
   .quick-btn:hover{background:var(--secondary);}
   .quick-btn:active{transform:scale(.96);}
 
   .search-row{display:flex;gap:8px;margin-bottom:12px;}
-  .search-row input{flex:1;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:16px;}
+  .search-row input{flex:1;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--bg-card);font-size:16px;}
   .filter-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:18px;}
   .filter-row::-webkit-scrollbar{display:none;}
-  .filter-chip{flex-shrink:0;padding:9px 16px;min-height:40px;border-radius:20px;border:1px solid var(--line);background:#fff;
+  .filter-chip{flex-shrink:0;padding:9px 16px;min-height:40px;border-radius:20px;border:1px solid var(--line);background:var(--bg-card);
     font-size:13px;color:var(--text-soft);font-weight:500;display:flex;align-items:center;transition:transform .1s;}
-  .filter-chip.active{background:var(--text);color:#fff;border-color:var(--text);}
+  .filter-chip.active{background:var(--text);color:var(--bg);border-color:var(--text);}
   .filter-chip:active{transform:scale(.95);}
   .cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   @media (min-width:640px){.cat-grid{grid-template-columns:repeat(3,1fr);}}
@@ -244,12 +249,12 @@
   .lightbox-next{right:6px;}
   .lightbox-dots{display:flex;gap:6px;}
   .lightbox-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.4);}
-  .lightbox-dot.active{background:#fff;width:16px;border-radius:4px;transition:width .15s;}
+  .lightbox-dot.active{background:var(--bg-card);width:16px;border-radius:4px;transition:width .15s;}
 
   .modal-bg{position:fixed;inset:0;background:rgba(64,59,54,0.45);z-index:200;display:flex;
     align-items:flex-end;justify-content:center;}
   @media (min-width:640px){.modal-bg{align-items:center;}}
-  .modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;
+  .modal{background:var(--bg-card);border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:88vh;overflow-y:auto;
     padding:22px 20px 26px 20px;}
   @media (min-width:640px){.modal{border-radius:18px;}}
   .modal h3{font-size:17px;font-weight:700;margin:0 0 16px 0;}
@@ -275,7 +280,7 @@
   .contact-box{background:var(--secondary);border-radius:14px;padding:16px;font-size:13px;line-height:1.7;margin-top:8px;}
   .share-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px;}
   .share-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:14px 6px;
-    background:#fff;border:1px solid var(--line);border-radius:var(--radius);font-size:11.5px;font-weight:600;
+    background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);font-size:11.5px;font-weight:600;
     color:var(--text);text-align:center;line-height:1.4;}
   .share-btn svg{width:20px;height:20px;color:var(--accent-deep);flex-shrink:0;}
   .share-btn:hover{background:var(--secondary);}
@@ -287,12 +292,12 @@
   .login-card h1{font-size:19px;font-weight:700;margin:0 0 4px 0;text-align:center;}
   .login-card p{font-size:13px;color:var(--text-soft);margin:0 0 20px 0;text-align:center;}
   .login-tabs{display:flex;gap:8px;margin-bottom:18px;}
-  .login-tabs button{flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);background:#fff;
+  .login-tabs button{flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);background:var(--bg-card);
     font-size:13.5px;font-weight:600;color:var(--text-soft);}
-  .login-tabs button.active{background:var(--text);color:#fff;border-color:var(--text);}
+  .login-tabs button.active{background:var(--text);color:var(--bg);border-color:var(--text);}
 
   .more-list .side-link{padding:16px 12px;font-size:15px;border-bottom:1px solid var(--line);border-radius:0;}
-  .more-list{background:#fff;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+  .more-list{background:var(--bg-card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
   .vol-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);}
   .vol-row:last-child{border-bottom:none;}
   .badge-role{font-size:11px;padding:2px 8px;border-radius:10px;background:var(--secondary);color:var(--text-soft);font-weight:600;}
@@ -364,7 +369,10 @@ const PERSONALITY_OPTIONS = [
   '親人','慢熟','黏人','獨立','活潑','好動','愛玩','安靜','穩重','膽小',
   '大膽','愛撒嬌','愛叫','話多','貪吃','挑食','愛睡覺','好奇心強','聰明','敏感',
   '溫和','愛乾淨','怕生','護食','喜歡曬太陽','喜歡抱抱','不喜歡抱抱','喜歡逗貓棒','喜歡追光','領域性強',
-  '會咬人','不會咬人','喜歡狗','怕狗','喜歡小孩','喜歡其他貓','喜歡獨處','需要陪伴','喜歡高處','喜歡窩毯子'
+  '會咬人','不會咬人','喜歡狗','怕狗','喜歡小孩','喜歡其他貓','喜歡獨處','需要陪伴','喜歡高處','喜歡窩毯子',
+  '愛踏踏','愛呼嚕','喜歡被摸頭','不喜歡被摸肚子','喜歡被梳毛','怕吹風機','怕打雷','怕陌生聲響','適應力強','適應較慢',
+  '食慾很好','食量小','愛喝水','用貓砂盆很穩','愛抓沙發','喜歡抓貓抓板','喜歡紙箱','愛躲藏','愛跟著人走','喜歡坐腿上',
+  '夜間活躍','白天愛睡','愛看窗外','愛玩逗貓棒','愛玩球類','愛玩羽毛','喜歡被呼喚','不愛吵鬧','好相處','需要耐心'
 ];
 
 const STATUS_STYLE = {
@@ -894,6 +902,36 @@ function startAddCat(){
   };
   render();
 }
+function dateField(id, label, val){
+  const v = String(val||'').slice(0,10);
+  return `<div class="field"><label>${label}<span class="hint">可直接輸入數字，例如 20261125</span></label>
+    <div style="display:flex;gap:8px"><input type="text" inputmode="numeric" autocomplete="off" data-datefield="1" data-valid="${esc(v)}" id="${id}" value="${esc(v)}" placeholder="YYYY-MM-DD" maxlength="10" style="flex:1">
+    <button type="button" class="btn btn-ghost" data-datepick="${id}" aria-label="開啟日曆" style="padding:0 14px">${ICONS.calendar||'日曆'}</button>
+    <input type="date" data-datehidden="${id}" style="position:absolute;opacity:0;pointer-events:none;width:1px;height:1px" tabindex="-1"></div></div>`;
+}
+function fmtDateDigits(raw){
+  const d = raw.replace(/\D/g,'').slice(0,8);
+  if(d.length<=4) return d;
+  if(d.length<=6) return d.slice(0,4)+'-'+d.slice(4);
+  return d.slice(0,4)+'-'+d.slice(4,6)+'-'+d.slice(6);
+}
+function isValidDateStr(v){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(v)) return false;
+  const d = new Date(v+'T00:00:00'); return !isNaN(d) && d.toISOString().slice(0,10)===v || (!isNaN(d) && v===`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
+}
+document.addEventListener('input', e=>{
+  const t=e.target; if(t.dataset && t.dataset.datefield){ const f=fmtDateDigits(t.value); if(f!==t.value) t.value=f; if(isValidDateStr(f)) t.dataset.valid=f; }
+});
+document.addEventListener('focusout', e=>{
+  const t=e.target; if(t.dataset && t.dataset.datefield){ if(isValidDateStr(t.value)) t.dataset.valid=t.value; else { t.value=t.dataset.valid||todayInput(); toast('日期格式不正確，已還原','err'); } t.dispatchEvent(new Event('change',{bubbles:true})); }
+});
+document.addEventListener('click', e=>{
+  const b=e.target.closest && e.target.closest('[data-datepick]'); if(!b) return;
+  const id=b.dataset.datepick; const txt=document.getElementById(id); const h=document.querySelector(`[data-datehidden="${id}"]`);
+  if(!h) return; h.value=isValidDateStr(txt.value)?txt.value:''; 
+  h.onchange=()=>{ if(h.value){ txt.value=h.value; txt.dataset.valid=h.value; txt.dispatchEvent(new Event('change',{bubbles:true})); } };
+  try{ h.showPicker(); }catch(err){ h.focus(); h.click(); }
+});
 function selectField(id, label, options, val, hint){
   return `<div class="field"><label>${label}${hint?`<span class="hint">${hint}</span>`:''}</label>
     <select id="${id}">${options.map(o=>`<option value="${esc(o)}" ${o===val?'selected':''}>${esc(o)}</option>`).join('')}</select></div>`;
@@ -938,7 +976,7 @@ function stepBasic(ac){
       </div>
       <div class="chip-count">已選擇 ${ac.personalityTags.length} 項</div>
     </div>
-    <div class="field"><label>中途日期</label><input type="date" id="f_fosterDate" value="${esc(ac.fosterDate)}"></div>
+    ${dateField('f_fosterDate','中途日期',ac.fosterDate)}
     ${selectField('f_rescueSource','救援來源',RESCUE_SOURCE_OPTIONS,ac.rescueSource)}
     ${ac.rescueSource==='其他'?`<div class="field"><label>請輸入救援來源</label><input type="text" id="f_rescueSourceOther" value="${esc(ac.rescueSourceOther)}"></div>`:''}
     ${selectField('f_status','目前狀態',CARE_STATUSES,ac.status)}
@@ -1018,6 +1056,8 @@ function bindAddCat(){
     }));
   }
   if(ac.step===2){
+    document.querySelectorAll('#view input[type=text], #view textarea').forEach(el=>{ const m={f_name:'name',f_colorOther:'colorOther',f_rescueSourceOther:'rescueSourceOther'}; if(m[el.id]) el.addEventListener('input',()=>ac[m[el.id]]=el.value); });
+    const fd=document.getElementById('f_fosterDate'); if(fd) fd.addEventListener('change',()=>{ if(isValidDateStr(fd.value)) ac.fosterDate=fd.value; });
     document.getElementById('f_gender').addEventListener('change', e=>ac.gender=e.target.value);
     document.getElementById('f_age').addEventListener('change', e=>ac.age=e.target.value);
     document.getElementById('f_color').addEventListener('change', e=>{ ac.color=e.target.value; render(); });
@@ -1030,6 +1070,8 @@ function bindAddCat(){
     }));
   }
   if(ac.step===3){
+    const hn=document.getElementById('h_note'); if(hn) hn.addEventListener('input',()=>ac.health.note=hn.value);
+    const hso=document.getElementById('h_statusOther'); if(hso) hso.addEventListener('input',()=>ac.health.statusOther=hso.value);
     ['external','neuter','chip'].forEach(k=>{
       const el=document.getElementById('h_'+k); if(el) el.addEventListener('change', e=>ac.health[k]=e.target.value);
     });
@@ -1316,7 +1358,7 @@ function openHealthModal(c, existingRecord){
 
   const bg = openModal(`
     <h3>${isEdit?'編輯健康紀錄':'新增健康紀錄'}</h3>
-    <div class="field"><label>日期</label><input type="date" id="m_date" value="${esc(initDate)}"></div>
+    ${dateField('m_date','日期',initDate)}
     ${selectField('m_type','類型', HEALTH_RECORD_TYPES, initType)}
     <div class="field"><label>備註</label><textarea id="m_note" placeholder="例如：精神食慾正常">${esc(initNote)}</textarea></div>
     <div class="field">
@@ -1332,7 +1374,7 @@ function openHealthModal(c, existingRecord){
     </div>
     <div id="diseaseDetails">${diseaseDetailHTML(local)}</div>
     <div class="modal-actions"><button class="btn btn-ghost btn-full" id="m_cancel">取消</button><button class="btn btn-primary btn-full" id="m_save">儲存</button></div>
-    ${isEdit?`<button class="btn btn-full" id="m_delete" style="margin-top:10px;color:#B23B3B;border:1px solid #E9C9C4;background:#fff">${ICONS.x} 刪除這筆紀錄</button>`:''}
+    ${isEdit?`<button class="btn btn-full" id="m_delete" style="margin-top:10px;color:#B23B3B;border:1px solid #E9C9C4;background:var(--bg-card)">${ICONS.x} 刪除這筆紀錄</button>`:''}
   `, (bg)=>{
     function refresh(){
       bg.querySelector('#diseaseChipsWrap').innerHTML = diseaseChipsHTML(local);
@@ -1398,7 +1440,7 @@ function openHealthModal(c, existingRecord){
 function openFosterLogModal(c){
   openModal(`
     <h3>新增今日紀錄</h3>
-    <div class="field"><label>日期</label><input type="date" id="m_date" value="${todayInput()}"></div>
+    ${dateField('m_date','日期',todayInput())}
     <div class="field"><label>今天發生什麼事</label><textarea id="m_content" rows="4" placeholder="例如：今天開始願意主動靠近人"></textarea></div>
     <div class="ai-box"><h4>AI 整理成「今日中途日常」</h4>
       <button class="btn btn-secondary btn-full" id="m_ai" type="button">AI 幫我整理</button>
@@ -1440,7 +1482,7 @@ function editCatModalHTML(local){
         ${PERSONALITY_OPTIONS.map(p=>`<button type="button" class="chip ${local.personalityTags.includes(p)?'active':''}" data-p="${esc(p)}">${esc(p)}</button>`).join('')}
       </div>
     </div>
-    <div class="field"><label>中途日期</label><input type="date" id="m_fosterDate" value="${esc(local.fosterDate)}"></div>
+    ${dateField('m_fosterDate','中途日期',local.fosterDate)}
     ${selectField('m_rescueSource','救援來源',RESCUE_SOURCE_OPTIONS,local.rescueSource)}
     ${local.rescueSource==='其他'?`<div class="field"><label>請輸入救援來源</label><input type="text" id="m_rescueSourceOther" value="${esc(local.rescueSourceOther)}"></div>`:''}
     ${selectField('m_status','目前狀態',CARE_STATUSES,local.status)}
