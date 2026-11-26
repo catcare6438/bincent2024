@@ -868,17 +868,26 @@ function bindDashboard(){
 
 // ---------- internal cat list ----------
 const FILTERS = ['全部','找家中','治療中','已預約','已找到家','暫不開放認養'];
-function renderCatList(){
+function filteredCats(){
   const q = (state.catQuery||'').trim(); const f = state.catFilter||'全部';
   let list = state.cats;
   if(f!=='全部') list = list.filter(c=>c.status===f);
-  if(q) list = list.filter(c=>[c.name,c.color,c.gender,c.status,c.adoption.status,c.rescueSource,c.health.status].some(v=>v&&v.includes(q)));
-  return `
-    <div class="search-row"><input type="text" id="catSearch" placeholder="搜尋姓名、毛色、狀態..." value="${esc(q)}"></div>
-    <div class="filter-row">${FILTERS.map(x=>`<button class="filter-chip ${f===x?'active':''}" data-f="${x}">${x}</button>`).join('')}</div>
-    ${list.length? `<div class="cat-grid">${list.map(catCard).join('')}</div>` : `
+  if(q) list = list.filter(c=>[c.name,c.color,c.gender,c.status,c.adoption&&c.adoption.status,c.rescueSource,c.health&&c.health.status].some(v=>v&&v.includes(q)));
+  return list;
+}
+function catResultsHTML(){
+  const q = (state.catQuery||'').trim(); const f = state.catFilter||'全部';
+  const list = filteredCats();
+  return list.length? `<div class="cat-grid">${list.map(catCard).join('')}</div>` : `
       <div class="empty">${ICONS.paw_off}<p>${q||f!=='全部'?'找不到符合條件的貓咪':'目前還沒有貓咪資料'}</p>
-      <button class="btn btn-primary" id="emptyAdd">新增第一隻貓咪</button></div>`}
+      ${q||f!=='全部'?'':'<button class="btn btn-primary" id="emptyAdd">新增第一隻貓咪</button>'}</div>`;
+}
+function renderCatList(){
+  const q = (state.catQuery||'').trim(); const f = state.catFilter||'全部';
+  return `
+    <div class="search-row"><input type="text" id="catSearch" placeholder="搜尋姓名、毛色、狀態..." value="${esc(state.catQuery||'')}" autocomplete="off"></div>
+    <div class="filter-row">${FILTERS.map(x=>`<button class="filter-chip ${f===x?'active':''}" data-f="${x}">${x}</button>`).join('')}</div>
+    <div id="catResults">${catResultsHTML()}</div>
   `;
 }
 function catCard(c){
@@ -893,13 +902,22 @@ function catCard(c){
     </div>
   `;
 }
+function bindCatResults(){
+  document.querySelectorAll('#catResults [data-open]').forEach(el=>el.addEventListener('click', ()=>go('catdetail',{currentCatId:el.dataset.open})));
+  const emptyAdd = document.getElementById('emptyAdd'); if(emptyAdd) emptyAdd.addEventListener('click', startAddCat);
+}
 function bindCatList(){
   const search = document.getElementById('catSearch');
-  if(search) search.addEventListener('input', e=>{ state.catQuery=e.target.value; document.getElementById('view').innerHTML=renderCatList(); bindCatList();
-    const el=document.getElementById('catSearch'); el.focus(); el.setSelectionRange(state.catQuery.length,state.catQuery.length); });
+  if(search){
+    let composing = false;
+    const update = ()=>{ state.catQuery = search.value; document.getElementById('catResults').innerHTML = catResultsHTML(); bindCatResults(); };
+    // 只更新下方結果，不重畫輸入框，注音／拼音輸入才不會被打斷
+    search.addEventListener('compositionstart', ()=>{ composing = true; });
+    search.addEventListener('compositionend', ()=>{ composing = false; update(); });
+    search.addEventListener('input', ()=>{ if(!composing) update(); });
+  }
   document.querySelectorAll('[data-f]').forEach(b=>b.addEventListener('click', ()=>{ state.catFilter=b.dataset.f; render(); }));
-  document.querySelectorAll('[data-open]').forEach(el=>el.addEventListener('click', ()=>go('catdetail',{currentCatId:el.dataset.open})));
-  const emptyAdd = document.getElementById('emptyAdd'); if(emptyAdd) emptyAdd.addEventListener('click', startAddCat);
+  bindCatResults();
 }
 
 // ---------- add cat wizard ----------
