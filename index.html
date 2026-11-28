@@ -737,19 +737,13 @@ function renderLogin(){
       <div class="card login-card">
         <div class="logo">🐾</div>
         <h1>志工／管理員登入</h1>
-        <p>請選擇身分並輸入密碼</p>
+        <p>志工只需輸入自己的密碼即可登入</p>
         <div class="login-tabs">
           <button data-tab="volunteer" class="${tab==='volunteer'?'active':''}">志工登入</button>
           <button data-tab="admin" class="${tab==='admin'?'active':''}">管理員登入</button>
         </div>
         ${tab==='volunteer' ? `
-          <div class="field" style="text-align:left">
-            <label>選擇您的姓名</label>
-            <select id="loginVol">
-              ${activeVolunteers().length? activeVolunteers().map(v=>`<option value="${v.id}">${esc(v.name)}</option>`).join('') : `<option value="">尚無志工帳號，請洽管理員新增</option>`}
-            </select>
-          </div>
-          <div class="field" style="text-align:left"><label>密碼</label><input type="password" id="loginPw" placeholder="請輸入密碼"></div>
+          <div class="field" style="text-align:left"><label>志工密碼</label><input type="password" id="loginPw" placeholder="請輸入管理員給您的密碼" autocomplete="current-password"></div>
         ` : `
           <div class="field" style="text-align:left"><label>管理員密碼</label><input type="password" id="loginAdminPw" placeholder="請輸入管理員密碼"></div>
         `}
@@ -770,12 +764,9 @@ function bindLogin(){
         if(!pw){ toast('請輸入管理員密碼','err'); return; }
         body = { role:'admin', password: pw };
       } else {
-        const volSel = document.getElementById('loginVol');
-        const volId = volSel ? volSel.value : '';
         const pw = document.getElementById('loginPw').value;
-        if(!volId){ toast('請先請管理員新增志工帳號','err'); return; }
         if(!pw){ toast('請輸入密碼','err'); return; }
-        body = { role:'volunteer', volunteerId: volId, password: pw };
+        body = { role:'volunteer', password: pw };
       }
       const res = await apiFetch('/api/auth/login', { method:'POST', auth:false, body });
       localStorage.setItem(TOKEN_KEY, res.token);
@@ -1779,7 +1770,7 @@ function bindVolunteers(){
     openModal(`
       <h3>新增志工帳號</h3>
       <div class="field"><label>姓名</label><input type="text" id="m_name" placeholder="例如：小美"></div>
-      <div class="field"><label>密碼</label><input type="password" id="m_pw" placeholder="請設定登入密碼"></div>
+      <div class="field"><label>密碼</label><input type="password" id="m_pw" placeholder="請設定登入密碼（至少 4 個字元，不能與其他志工重複）"></div>
       <div class="modal-actions"><button class="btn btn-ghost btn-full" id="m_cancel">取消</button><button class="btn btn-primary btn-full" id="m_save">新增</button></div>
     `, (bg)=>{
       bg.querySelector('#m_cancel').addEventListener('click', ()=>bg.remove());
