@@ -128,6 +128,10 @@
   .chip{padding:10px 15px;min-height:40px;border-radius:20px;border:1px solid var(--line);background:var(--bg-card);font-size:13px;
     color:var(--text-soft);font-weight:500;}
   .chip.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .pencil-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;margin-left:8px;border-radius:50%;border:1px solid var(--line);background:var(--bg-card);color:var(--accent-deep);vertical-align:middle;}
+  .pencil-btn svg{width:15px;height:15px;}
+  .chip-del{display:inline-flex;align-items:center;gap:6px;padding-right:6px;}
+  .chip-del button{width:22px;height:22px;border-radius:50%;border:none;background:var(--secondary);color:var(--text);font-size:15px;line-height:1;display:inline-flex;align-items:center;justify-content:center;}
   .chip-count{font-size:12px;color:var(--text-soft);margin-top:6px;}
   .toast-wrap{position:fixed;bottom:90px;left:0;right:0;display:flex;justify-content:center;z-index:100;pointer-events:none;}
   @media (min-width:900px){.toast-wrap{bottom:24px;}}
@@ -447,6 +451,7 @@ async function loadPublicData(){
 async function loadInternalData(){
   state.cats = await apiFetch('/api/cats');
   state.volunteers = await apiFetch('/api/volunteers');
+  try{ const r = await apiFetch('/api/settings/personality'); state.personalityCustom = (r && Array.isArray(r.options) && r.options.length) ? r.options : null; }catch(e){ state.personalityCustom = null; }
   if(state.user.role==='管理員'){
     try{ state.activityLog = await apiFetch('/api/activity'); }catch(e){ state.activityLog=[]; }
   }
@@ -961,6 +966,44 @@ document.addEventListener('click', e=>{
   h.onchange=()=>{ if(h.value){ txt.value=h.value; txt.dataset.valid=h.value; txt.dispatchEvent(new Event('change',{bubbles:true})); } };
   try{ h.showPicker(); }catch(err){ h.focus(); h.click(); }
 });
+function personalityOptions(){ return (state.personalityCustom && state.personalityCustom.length) ? state.personalityCustom : PERSONALITY_OPTIONS; }
+function personalityChips(selected){
+  const all = personalityOptions().concat((selected||[]).filter(t=>!personalityOptions().includes(t)));
+  return all.map(p=>`<button type="button" class="chip ${(selected||[]).includes(p)?'active':''}" data-p="${esc(p)}">${esc(p)}</button>`).join('');
+}
+function personalityEditBtn(){
+  return (state.user && state.user.role==='管理員') ? `<button type="button" class="pencil-btn" data-editpersonality="1" aria-label="編輯個性標籤選項" title="新增／刪除個性標籤">${ICONS.edit}</button>` : '';
+}
+function openPersonalityManager(onDone){
+  let list = personalityOptions().slice();
+  const bg = openModal(`
+    <h3 style="margin:0 0 6px;font-size:17px">編輯個性標籤</h3>
+    <div style="font-size:12.5px;color:var(--text-soft);margin-bottom:12px">點 × 刪除標籤；已經套用在貓咪身上的標籤不受影響。</div>
+    <div class="field"><label>新增標籤</label>
+      <div style="display:flex;gap:8px"><input type="text" id="pm_new" maxlength="20" placeholder="例如：愛聊天" autocomplete="off" style="flex:1"><button type="button" class="btn btn-secondary" id="pm_add">新增</button></div></div>
+    <div class="chip-grid" id="pm_list" style="margin-bottom:12px"></div>
+    <div class="chip-count" id="pm_count"></div>
+    <div style="display:flex;gap:10px;margin-top:14px"><button type="button" class="btn btn-ghost" id="pm_reset">恢復預設</button><button type="button" class="btn btn-primary btn-full" id="pm_save">儲存</button></div>
+  `, bg=>{
+    const draw=()=>{
+      bg.querySelector('#pm_list').innerHTML = list.map((p,i)=>`<span class="chip chip-del">${esc(p)}<button type="button" data-rm="${i}" aria-label="刪除${esc(p)}">×</button></span>`).join('');
+      bg.querySelector('#pm_count').textContent = `共 ${list.length} 個標籤`;
+      bg.querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click',()=>{ list.splice(+b.dataset.rm,1); draw(); }));
+    };
+    const add=()=>{ const el=bg.querySelector('#pm_new'); const t=el.value.trim(); if(!t) return; if(list.includes(t)){ toast('這個標籤已經存在','err'); return; } list.push(t); el.value=''; draw(); el.focus(); };
+    bg.querySelector('#pm_add').addEventListener('click', add);
+    bg.querySelector('#pm_new').addEventListener('keydown', e=>{ if(e.key==='Enter' && !e.isComposing){ e.preventDefault(); add(); } });
+    bg.querySelector('#pm_reset').addEventListener('click', ()=>{ if(confirm('確定要恢復成系統預設的 70 個標籤嗎？')){ list = PERSONALITY_OPTIONS.slice(); draw(); } });
+    bg.querySelector('#pm_save').addEventListener('click', async ()=>{
+      if(!list.length){ toast('至少要保留一個標籤','err'); return; }
+      try{
+        const r = await apiFetch('/api/settings/personality', { method:'PUT', body:{ options:list } });
+        state.personalityCustom = r.options; bg.remove(); toast('個性標籤已更新'); if(onDone) onDone();
+      }catch(e){ toast(e.message,'err'); }
+    });
+    draw();
+  });
+}
 function selectField(id, label, options, val, hint){
   return `<div class="field"><label>${label}${hint?`<span class="hint">${hint}</span>`:''}</label>
     <select id="${id}">${options.map(o=>`<option value="${esc(o)}" ${o===val?'selected':''}>${esc(o)}</option>`).join('')}</select></div>`;
@@ -999,9 +1042,9 @@ function stepBasic(ac){
     ${selectField('f_age','年齡',AGE_BRACKETS,ac.age)}
     ${selectField('f_color','毛色',COLOR_OPTIONS,ac.color)}
     ${ac.color==='其他'?`<div class="field"><label>請輸入毛色</label><input type="text" id="f_colorOther" value="${esc(ac.colorOther)}"></div>`:''}
-    <div class="field"><label>個性 <span class="hint">可複選，點選即可</span></label>
+    <div class="field"><label>個性 <span class="hint">可複選，點選即可</span>${personalityEditBtn()}</label>
       <div class="chip-grid" id="f_personality">
-        ${PERSONALITY_OPTIONS.map(p=>`<button type="button" class="chip ${ac.personalityTags.includes(p)?'active':''}" data-p="${esc(p)}">${esc(p)}</button>`).join('')}
+        ${personalityChips(ac.personalityTags)}
       </div>
       <div class="chip-count">已選擇 ${ac.personalityTags.length} 項</div>
     </div>
@@ -1092,6 +1135,7 @@ function bindAddCat(){
     document.getElementById('f_color').addEventListener('change', e=>{ ac.color=e.target.value; render(); });
     document.getElementById('f_rescueSource').addEventListener('change', e=>{ ac.rescueSource=e.target.value; render(); });
     document.getElementById('f_status').addEventListener('change', e=>ac.status=e.target.value);
+    const pe=document.querySelector('[data-editpersonality]'); if(pe) pe.addEventListener('click',()=>openPersonalityManager(()=>render()));
     document.querySelectorAll('#f_personality .chip').forEach(b=>b.addEventListener('click', ()=>{
       const p=b.dataset.p; const idx=ac.personalityTags.indexOf(p);
       if(idx>=0) ac.personalityTags.splice(idx,1); else ac.personalityTags.push(p);
@@ -1517,9 +1561,9 @@ function editCatModalHTML(local){
     ${selectField('m_age','年齡',AGE_BRACKETS,local.age)}
     ${selectField('m_color','毛色',COLOR_OPTIONS,local.color)}
     ${local.color==='其他'?`<div class="field"><label>請輸入毛色</label><input type="text" id="m_colorOther" value="${esc(local.colorOther)}"></div>`:''}
-    <div class="field"><label>個性 <span class="hint">可複選</span></label>
+    <div class="field"><label>個性 <span class="hint">可複選</span>${personalityEditBtn()}</label>
       <div class="chip-grid" id="m_personality">
-        ${PERSONALITY_OPTIONS.map(p=>`<button type="button" class="chip ${local.personalityTags.includes(p)?'active':''}" data-p="${esc(p)}">${esc(p)}</button>`).join('')}
+        ${personalityChips(local.personalityTags)}
       </div>
     </div>
     ${dateField('m_fosterDate','中途日期',local.fosterDate)}
@@ -1568,6 +1612,7 @@ function openEditCatModal(c){
       bg.querySelector('#m_age').addEventListener('change', e=>local.age=e.target.value);
       bg.querySelector('#m_color').addEventListener('change', e=>{ local.color=e.target.value; refresh(); });
       const colorOtherEl = bg.querySelector('#m_colorOther'); if(colorOtherEl) colorOtherEl.addEventListener('input', e=>local.colorOther=e.target.value);
+      const pe2=bg.querySelector('[data-editpersonality]'); if(pe2) pe2.addEventListener('click',()=>openPersonalityManager(()=>refresh()));
       bg.querySelectorAll('#m_personality .chip').forEach(b=>b.addEventListener('click', ()=>{
         const p=b.dataset.p; const idx=local.personalityTags.indexOf(p);
         if(idx>=0) local.personalityTags.splice(idx,1); else local.personalityTags.push(p);
